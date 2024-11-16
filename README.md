@@ -86,7 +86,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── test_urlspy.c
     │   └── test_xmlbuilder.c
     │
-    ├── /exe                        // Pour développement 
+    ├── /exe                      // Pour développement 
     │   ├── main
     │   ├── interface
     │   ├── porteye
@@ -191,7 +191,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
-- `style` : Modifications de formatage ou refactorisation du code. Exemple : `style(scanner): alignement des indentations / style(scanner): simplification du code`
+- `style` : Modifications de formatage ou refactorisation du code. Exemple : `style(scanner): alignement des indentations` / `style(scanner): simplification du code`
 - `fix` : Correction de bug. Exemple : `fix(scanner): correction de la plage de ports`
 
 ## Méthodologie de développement d'un outil 
