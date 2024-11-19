@@ -1,18 +1,20 @@
-// Bibliothèque standard d'entrée/sortie
+// Bibliothèque standard d'entrée/sortie, fournit des fonctions de base pour la gestion des entrées/sorties (I/O) en C. Elle permet d'effectuer des opérations de lecture et d'écriture via le terminal ou des fichiers. Parmi les fonctions les plus courantes, on trouve printf() pour afficher des messages à l'écran, et scanf() pour lire les entrées de l'utilisateur.
 #include <stdio.h>
-// Bibliothèque standard de fonctions utilitaires
+// Bibliothèque standard de fonctions utilitaires, offre un ensemble de fonctions utiles pour la gestion de la mémoire, des processus, et des conversions de données. Elle inclut des fonctions telles que malloc() et free() pour allouer et libérer de la mémoire dynamique, exit() pour terminer un programme, et atoi() pour convertir des chaînes de caractères en entiers.
 #include <stdlib.h>
-// Bibilothèque de manipulation de chaîne de caractères : strcmp() compare deux chaînes, strcpy() copie une chaîne dans une autre
+// Bibliothèque de manipulation de chaînes de caractères, fournit des fonctions pour manipuler des chaînes de caractères en C. Les fonctions les plus utilisées incluent strcmp() pour comparer deux chaînes, strcpy() pour copier une chaîne dans une autre, et strlen() pour obtenir la longueur d'une chaîne. Ces fonctions facilitent le traitement des données textuelles dans les programmes C.
 #include <string.h>
-// Bibliothèque pour expressions régulières : regcomp() compile une regex, regexec() éxécute la regex compilée pour vérifier si une chaîne correspond, regfree() libère les ressources allouées pour la regex
+// Bibliothèque pour les expressions régulières, permet d'utiliser des expressions régulières en C, ce qui permet de rechercher, valider ou manipuler des chaînes de caractères en utilisant des motifs définis. Les fonctions principales sont regcomp() pour compiler une expression régulière, regexec() pour tester si une chaîne correspond à une expression régulière, et regfree() pour libérer les ressources allouées à l'expression régulière.
 #include <regex.h>
-// Bibliothèque des fonctions POSIX de base (fournit des fonctions système de bas niveau pour l'accès aux fichiers, la gestion des processus, et diverses autres opérations sur les systèmes Unix) : close() ferme un descripteur de fichier (ici, une socket)
+// Bibliothèque d'assertions, utilisée pour la vérification des conditions dans le code pendant le développement. Elle permet d'ajouter des assertions, qui sont des tests de conditions logiques dans le programme. Si l'expression testée par assert() est fausse, l'exécution du programme s'arrête et un message d'erreur est affiché. Cela permet de détecter rapidement des erreurs pendant la phase de développement. Une utilisation courante serait :
+#include <assert.h>
+// Bibliothèque des fonctions POSIX de base, offre des fonctions de bas niveau pour travailler avec des fichiers, des processus, et d'autres mécanismes de l'OS. Elle inclut des fonctions comme close() pour fermer un fichier ou une socket, read() et write() pour la gestion des fichiers ou des flux, et fork() pour créer un nouveau processus. Cette bibliothèque est très utilisée dans la programmation système sous Unix/Linux.
 #include <unistd.h>
-// Bibliothèque utilisée pour gérer les adresses et les communications réseau avec les protocoles de la famille IPv4 : inet_pton() convertit une adresse IPv4 au format texte en format binaire pour être utilisée dans les structures de socket
+// Bibliothèque pour la gestion des adresses IPv4, contient des fonctions pour manipuler les adresses réseau, principalement pour IPv4. La fonction inet_pton() est utilisée pour convertir une adresse IP au format texte (par exemple, "192.168.0.1") en un format binaire qui peut être utilisé dans les structures de socket. Cela permet de préparer les adresses avant de les utiliser dans des opérations réseau.
 #include <arpa/inet.h>
-// Bibliothèque des sockets qui fournit des fonctions pour la création, la configuration et la gestion des connexions réseau via des sockets : socket() crée une socket pour une communication TCP ou UDP dans notre cas, connect() établit une connexion avec un serveur spécifié par une adresse IP et un port, setsockopt() permet de configurer certaines options d'une socket (par exemple, le timeout)
+// Bibliothèque des sockets, fournit des fonctions pour la création, la gestion et la communication via des sockets. Les fonctions incluent socket() pour créer une nouvelle socket, connect() pour établir une connexion, bind() pour lier une socket à une adresse et un port, et setsockopt() pour configurer des options spécifiques de la socket, comme les délais de timeout.
 #include <sys/socket.h>
-// Bibliothèque des codes d'érreur système : errno : Variable globale qui contient le code d'erreur de la dernière fonction système échouée.
+// Bibliothèque des erreurs système, contient la variable globale errno, qui est utilisée pour signaler les erreurs retournées par les fonctions système. Chaque fois qu'une fonction échoue (comme socket() ou connect()), la variable errno est mise à jour avec un code d'erreur spécifique. Ces erreurs peuvent être récupérées et affichées pour aider à diagnostiquer les problèmes. Les codes d'erreur sont définis dans cette bibliothèque, comme ENOENT pour un fichier introuvable, ou ECONNREFUSED pour une connexion refusée.
 #include <errno.h>
 
 #define TIMEOUT 1
