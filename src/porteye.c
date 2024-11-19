@@ -24,7 +24,7 @@ int checkIp(const char *ip) {
 }
 
 int checkPort(int start_port, int end_port) {
-    if (start_port < 0 || start_port > MAX_PORTS || end_port < 1 || end_port > MAX_PORTS) {
+    if (start_port < 0 || start_port > MAX_PORTS || end_port < 0 || end_port > MAX_PORTS) {
         fprintf(stderr, "Erreur : plage de ports invalide <0-65535>\n");
         return -1;
     }
