@@ -39,18 +39,18 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Estimation de production 
 
-|         Tache                            | Estimation de temps  |
-|------------------------------------------|----------------------|
-| • Convention de code                     |        1 heure       |
-| • Dépôt distant et structure du projet   |        1 heure       |
-| • Répartition + Jira                     |        1 heure       |
-| • PortEye                                |       10 heures      |
-| • PacketSnoop                            |       15 heures      |
-| • FileSecure                             |       15 heures      |
-| • DDoSWatcher                            |       10 heures      |
-| • URLSpy                                 |       15 heures      |
-| • XMLBuilder                             |       15 heures      |
-| • Interface utilisateur avec SDL2.0      |       20 heures      |
+|         Tache                            | Estimation de temps  |   Responsable   |      Délais      |
+|------------------------------------------|----------------------|-----------------|------------------|
+| • Convention de code et git              |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • Dépôt distant et structure du projet   |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • Répartition + Trello                   |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • PortEye                                |       10 heures      |    @pepe8in     |  avant 05/01/25  |
+| • PacketSnoop                            |       15 heures      |    @eafonso5    |  avant 05/01/25  |
+| • FileSecure                             |       15 heures      |    @sangeric    |  avant 05/01/25  |
+| • DDoSWatcher                            |       10 heures      |    @eafonso5    |  avant 05/01/25  |
+| • URLSpy                                 |       15 heures      |    @pepe8in     |  avant 05/01/25  |
+| • XMLBuilder                             |       15 heures      |    @sangeric    |  avant 05/01/25  |
+| • Interface utilisateur avec SDL         |       20 heures      |        ?        |  avant 05/02/25  |
 
 ## Structure du projet 
 
@@ -67,7 +67,6 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   └── xmlbuilder.c         // Module Gestionnaire de Base de Données
     │
     ├── /include
-    │   ├── main.h
     │   ├── interface.h
     │   ├── porteye.h
     │   ├── packetsnoop.h
@@ -76,9 +75,8 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── urlspy.h
     │   └── xmlbuilder.h
     │
-    ├── /tests                  
+    ├── /tests
     │   ├── test_main.c
-    │   ├── test_interface.c
     │   ├── test_porteye.c
     │   ├── test_packetsnoop.c
     │   ├── test_filesecure.c
@@ -86,9 +84,8 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── test_urlspy.c
     │   └── test_xmlbuilder.c
     │
-    ├── /exe                        // Pour développement 
+    ├── /exe
     │   ├── main
-    │   ├── interface
     │   ├── porteye
     │   ├── packetsnoop
     │   ├── filesecure
@@ -96,12 +93,10 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── urlspy
     │   └── xmlbuilder
     │   
-    ├── Makefile
-    │
+    ├── /.git
     ├── .gitignore
-    │
+    ├── Makefile
     ├── LICENSE
-    │
     └── README.md
 
 ## Convention de code 
