@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 # c-nets-tools
-=======
->>>>>>> 526fa62
-# 2A3 : S1 : Langage C : Projet final : C-Net Tools
 
 ## Contexte 
 
@@ -180,11 +174,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     #define ERR_INVALID_PORT -1
     ```
 
-<<<<<<< HEAD
-## Convention développement pour git
-=======
 ## Convention git
->>>>>>> 526fa62
 
 **Branch** :
 - `main` : Branche stable et prête à déployer.
@@ -192,11 +182,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `bugfix/<nom>` : Pour les corrections de bugs ou corrections urgentes. Exemple : `bugfix/fix-porteye`
 - `release/<version>` : Pour préparer une nouvelle version. Exemple : `release/v1.0`
 
-<<<<<<< HEAD
-**Commit** :  `<type>: <message court>`
-=======
 **Commit** :  `<type>: <message court en anglais>`
->>>>>>> 526fa62
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
@@ -205,22 +191,13 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Méthodologie de développement d'un outil 
 
-<<<<<<< HEAD
-1. Création d'une branche : feature/nom-outil
-2. Conception de la logique du programme
-3. Développement d'un exécutable en CLI : feat(nom-outil): message court
-5. Developpement de test unitaires : test(nom-outil): message court
-6. Revues de code en équipe
-7. Documentation des dépendances, de la conceptualisation et du développement de l'outil : docs(nom-outil): message court
-=======
 1. Création d'une branche 
 2. Conception de la logique du programme
 3. Développement d'un exécutable en CLI
 5. Developpement de test unitaires
 6. Revues de code en équipe
 7. Documentation des dépendances, de la conceptualisation et du développement de l'outil
->>>>>>> 526fa62
-7. Merge dans la branche main 
+8. Merge dans la branche main 
 
 ## PortEye
 ## PacketSnoop
@@ -228,14 +205,10 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 ## DDoSWatcher
 ## URLSpy
 ## XMLBuilder
-
 ## Interface utilisateur
 
 ## Crédit
 @pepe8in
 @sangeric
 @eafonso5
-<<<<<<< HEAD
-=======
->>>>>>> f868d89 (update README.md)
->>>>>>> 526fa62
+
