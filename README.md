@@ -215,5 +215,5 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Crédit
 @pepe8in
-@E. S. 
-@E. A.
+@sangeric
+@eafonso5
