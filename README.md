@@ -204,33 +204,6 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 7. Merge dans la branche main 
 
 ## PortEye
-
-### Fonctions principales :
-1. **Scan d'un seul port**
-Permet de scanner un seul port sur l'adresse IP spécifiée. Le programme vérifie si le port est ouvert ou fermé.
-2. **Scan d'une plage de ports**
-Permet de scanner une plage de ports, en vérifiant chaque port dans la plage spécifiée.
-3. **Scan de tous les ports (0 à 65535)**
-Permet de scanner tous les ports possibles (de 0 à 65535). Il peut prendre un certain temps en fonction de la vitesse de votre réseau et du nombre de ports à tester.
-4. **Scan des ports well-known (0 à 1023)**
-Permet de scanner les ports "bien connus", c'est-à-dire les ports compris entre 0 et 1023, qui sont souvent utilisés par des services standards comme HTTP (port 80), HTTPS (port 443), FTP (port 21), etc.
-5. **Scan des ports registered (1024 à 49151)**
-Permet de scanner les ports enregistrés, qui sont utilisés par des applications et des services enregistrés auprès de l'IANA.
-6. **Scan des ports dynamic/private (49152 à 65535)**
-Permet de scanner les ports dits "dynamiques" ou "privés", utilisés par des applications pour des connexions temporaires.
-7. **Afficher les ports ouverts dans une plage**
-Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont ouverts.
-
-### Bibliothèques utilisées :
-- ``stdio.h`` : Pour l'entrée et la sortie standard (affichage et lecture).
-- ``stdlib.h`` : Pour des fonctions utilitaires, telles que la gestion des erreurs.
-- ``string.h`` : Pour la manipulation de chaînes de caractères (si nécessaire).
-- ``regex.h`` : Pour la validation de l'adresse IP avec une expression régulière.
-- ``unistd.h`` : Pour la gestion des sockets et la fermeture de descripteurs de fichiers.
-- ``arpa/inet.h`` : Pour les fonctions de manipulation d'adresses IP (conversion entre format texte et binaire).
-- ``sys/socket.h`` : Pour la création et la gestion des connexions réseau via des sockets.
-- ``errno.h`` : Pour la gestion des erreurs système liées aux sockets.
-
 ## PacketSnoop
 ## FileSecure
 ## DDoSWatcher
@@ -241,5 +214,5 @@ Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont
 
 ## Crédit
 @pepe8in
-@E. S. 
-@E. A.
+@sangeric
+@eafonso5
