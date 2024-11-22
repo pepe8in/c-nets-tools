@@ -43,14 +43,14 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 |------------------------------------------|----------------------|
 | • Convention de code                     |        1 heure       |
 | • Dépôt distant et structure du projet   |        1 heure       |
-| • Répartition + Jira                     |        1 heure       |
+| • Répartition + Trello                   |        1 heure       |
 | • PortEye                                |       10 heures      |
 | • PacketSnoop                            |       15 heures      |
 | • FileSecure                             |       15 heures      |
 | • DDoSWatcher                            |       10 heures      |
 | • URLSpy                                 |       15 heures      |
 | • XMLBuilder                             |       15 heures      |
-| • Interface utilisateur avec SDL2.0      |       20 heures      |
+| • Interface utilisateur avec SDL         |       20 heures      |
 
 ## Structure du projet 
 
@@ -59,12 +59,12 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     ├── /src
     │   ├── main.c               // Point d'entrée de l'application
     │   ├── interface.c          // Gestion de l'interface utilisateur
-    │   ├── porteye.c            // Module Scanner de Ports
-    │   ├── packetsnoop.c        // Module Analyseur de Paquets
+    │   ├── porteye.c            // Module Scanner de ports
+    │   ├── packetsnoop.c        // Module Analyseur de paquets
     │   ├── filesecure.c         // Module Chiffrement/Déchiffrement
     │   ├── ddoswatcher.c        // Module Détection DDoS
     │   ├── urlspy.c             // Module Sniffer d'URL
-    │   └── xmlbuilder.c         // Module Gestionnaire de Base de Données
+    │   └── xmlbuilder.c         // Module Gestionnaire de base de données
     │
     ├── /include
     │   ├── main.h
@@ -76,7 +76,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── urlspy.h
     │   └── xmlbuilder.h
     │
-    ├── /tests                  
+    ├── /tests
     │   ├── test_main.c
     │   ├── test_interface.c
     │   ├── test_porteye.c
@@ -86,16 +86,15 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── test_urlspy.c
     │   └── test_xmlbuilder.c
     │
-    ├── /exe                      // Pour développement 
+    ├── /exe 
     │   ├── main
-    │   ├── interface
     │   ├── porteye
     │   ├── packetsnoop
     │   ├── filesecure
     │   ├── ddoswatcher
     │   ├── urlspy
     │   └── xmlbuilder
-    │   
+    │
     ├── Makefile
     │
     ├── .gitignore
@@ -179,7 +178,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     #define ERR_INVALID_PORT -1
     ```
 
-## Convention développement pour git
+## Convention git
 
 **Branch** :
 - `main` : Branche stable et prête à déployer.
@@ -187,7 +186,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `bugfix/<nom>` : Pour les corrections de bugs ou corrections urgentes. Exemple : `bugfix/fix-porteye`
 - `release/<version>` : Pour préparer une nouvelle version. Exemple : `release/v1.0`
 
-**Commit** :  `<type>: <message court>`
+**Commit** :  `<type>: <message court en anglais>`
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
@@ -196,15 +195,42 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Méthodologie de développement d'un outil 
 
-1. Création d'une branche : feature/nom-outil
+1. Création d'une branche
 2. Conception de la logique du programme
-3. Développement d'un exécutable en CLI : feat(nom-outil): message court
-5. Developpement de test unitaires : test(nom-outil): message court
+3. Développement d'un exécutable en CLI
+5. Developpement de test unitaires
 6. Revues de code en équipe
-7. Documentation des dépendances, de la conceptualisation et du développement de l'outil : docs(nom-outil): message court
+7. Documentation des dépendances, de la conceptualisation et du développement de l'outil
 7. Merge dans la branche main 
 
 ## PortEye
+
+### Fonctions principales :
+1. **Scan d'un seul port**
+Permet de scanner un seul port sur l'adresse IP spécifiée. Le programme vérifie si le port est ouvert ou fermé.
+2. **Scan d'une plage de ports**
+Permet de scanner une plage de ports, en vérifiant chaque port dans la plage spécifiée.
+3. **Scan de tous les ports (0 à 65535)**
+Permet de scanner tous les ports possibles (de 0 à 65535). Il peut prendre un certain temps en fonction de la vitesse de votre réseau et du nombre de ports à tester.
+4. **Scan des ports well-known (0 à 1023)**
+Permet de scanner les ports "bien connus", c'est-à-dire les ports compris entre 0 et 1023, qui sont souvent utilisés par des services standards comme HTTP (port 80), HTTPS (port 443), FTP (port 21), etc.
+5. **Scan des ports registered (1024 à 49151)**
+Permet de scanner les ports enregistrés, qui sont utilisés par des applications et des services enregistrés auprès de l'IANA.
+6. **Scan des ports dynamic/private (49152 à 65535)**
+Permet de scanner les ports dits "dynamiques" ou "privés", utilisés par des applications pour des connexions temporaires.
+7. **Afficher les ports ouverts dans une plage**
+Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont ouverts.
+
+### Bibliothèques utilisées :
+- ``stdio.h`` : Pour l'entrée et la sortie standard (affichage et lecture).
+- ``stdlib.h`` : Pour des fonctions utilitaires, telles que la gestion des erreurs.
+- ``string.h`` : Pour la manipulation de chaînes de caractères (si nécessaire).
+- ``regex.h`` : Pour la validation de l'adresse IP avec une expression régulière.
+- ``unistd.h`` : Pour la gestion des sockets et la fermeture de descripteurs de fichiers.
+- ``arpa/inet.h`` : Pour les fonctions de manipulation d'adresses IP (conversion entre format texte et binaire).
+- ``sys/socket.h`` : Pour la création et la gestion des connexions réseau via des sockets.
+- ``errno.h`` : Pour la gestion des erreurs système liées aux sockets.
+
 ## PacketSnoop
 ## FileSecure
 ## DDoSWatcher
