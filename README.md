@@ -43,14 +43,14 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 |------------------------------------------|----------------------|
 | • Convention de code                     |        1 heure       |
 | • Dépôt distant et structure du projet   |        1 heure       |
-| • Répartition + Jira                     |        1 heure       |
+| • Répartition + Trello                   |        1 heure       |
 | • PortEye                                |       10 heures      |
 | • PacketSnoop                            |       15 heures      |
 | • FileSecure                             |       15 heures      |
 | • DDoSWatcher                            |       10 heures      |
 | • URLSpy                                 |       15 heures      |
 | • XMLBuilder                             |       15 heures      |
-| • Interface utilisateur avec SDL2.0      |       20 heures      |
+| • Interface utilisateur avec SDL         |       20 heures      |
 
 ## Structure du projet 
 
@@ -178,7 +178,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     #define ERR_INVALID_PORT -1
     ```
 
-## Convention développement pour git
+## Convention git
 
 **Branch** :
 - `main` : Branche stable et prête à déployer.
@@ -186,7 +186,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `bugfix/<nom>` : Pour les corrections de bugs ou corrections urgentes. Exemple : `bugfix/fix-porteye`
 - `release/<version>` : Pour préparer une nouvelle version. Exemple : `release/v1.0`
 
-**Commit** :  `<type>: <message court>`
+**Commit** :  `<type>: <message court en anglais>`
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
@@ -195,12 +195,12 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Méthodologie de développement d'un outil 
 
-1. Création d'une branche : feature/nom-outil
+1. Création d'une branche
 2. Conception de la logique du programme
-3. Développement d'un exécutable en CLI : feat(nom-outil): message court
-5. Developpement de test unitaires : test(nom-outil): message court
+3. Développement d'un exécutable en CLI
+5. Developpement de test unitaires
 6. Revues de code en équipe
-7. Documentation des dépendances, de la conceptualisation et du développement de l'outil : docs(nom-outil): message court
+7. Documentation des dépendances, de la conceptualisation et du développement de l'outil
 7. Merge dans la branche main 
 
 ## PortEye
