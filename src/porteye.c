@@ -1,18 +1,16 @@
 #include "../include/porteye.h"
 
 int checkIp(const char *ip) {
-    const char *regex_pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+    const char *REGEX_PATTERN = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
     regex_t regex;
     int return_input;
 
-    // Compiler l'expression régulière pour vérifier le format IPv4
-    return_input = regcomp(&regex, regex_pattern, REG_EXTENDED);
+    return_input = regcomp(&regex, REGEX_PATTERN, REG_EXTENDED);
     if (return_input) {
         fprintf(stderr, "Erreur de compilation de la regex\n");
         return -1;
     }
 
-    // Tester si l'IP correspond à l'expression régulière
     return_input = regexec(&regex, ip, 0, NULL, 0);
     if (return_input != 0) {
         printf("Adresse IPv4 invalide : %s\n", ip);
@@ -44,26 +42,23 @@ int createSocket(const char *ip, int port) {
         return -1;
     }
 
-    // Définir un délai d'attente pour la connexion (timeout)
     struct timeval tv;
     tv.tv_sec = TIMEOUT;
     tv.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof(tv));
 
-    // Préparer l'adresse du serveur à connecter
     struct sockaddr_in server;
     server.sin_family = AF_INET;
-    server.sin_port = htons(port);  // Convertir le port en format réseau
-    inet_pton(AF_INET, ip, &server.sin_addr);  // Convertir l'IP en format binaire
+    server.sin_port = htons(port);  
+    inet_pton(AF_INET, ip, &server.sin_addr);  
 
-    // Tenter de se connecter au port
     int result = connect(sock, (struct sockaddr *)&server, sizeof(server));
     if (result < 0) {
-        close(sock);  // Fermer la socket en cas d'erreur
+        close(sock);  
         return result;
     }
 
-    return sock;  // Connexion réussie, retourner la socket ouverte
+    return sock;  
 }
 
 int scanPort(const char *ip, int port) {

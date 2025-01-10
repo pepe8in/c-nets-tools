@@ -1,4 +1,4 @@
-# 2A3 : S1 : Langage C : Projet final : C-Net Tools
+# c-nets-tools
 
 ## Contexte 
 
@@ -39,18 +39,18 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 
 ## Estimation de production 
 
-|         Tache                            | Estimation de temps  |
-|------------------------------------------|----------------------|
-| • Convention de code                     |        1 heure       |
-| • Dépôt distant et structure du projet   |        1 heure       |
-| • Répartition + Jira                     |        1 heure       |
-| • PortEye                                |       10 heures      |
-| • PacketSnoop                            |       15 heures      |
-| • FileSecure                             |       15 heures      |
-| • DDoSWatcher                            |       10 heures      |
-| • URLSpy                                 |       15 heures      |
-| • XMLBuilder                             |       15 heures      |
-| • Interface utilisateur avec SDL2.0      |       20 heures      |
+|         Tache                            | Estimation de temps  |   Responsable   |      Délais      |
+|------------------------------------------|----------------------|-----------------|------------------|
+| • Convention de code et git              |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • Dépôt distant et structure du projet   |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • Répartition + Trello                   |        1 heure       |    @pepe8in     |  avant 23/11/24  |
+| • PortEye                                |       10 heures      |    @pepe8in     |  avant 05/01/25  |
+| • PacketSnoop                            |       15 heures      |    @eafonso5    |  avant 05/01/25  |
+| • FileSecure                             |       15 heures      |    @sangeric    |  avant 05/01/25  |
+| • DDoSWatcher                            |       10 heures      |    @eafonso5    |  avant 05/01/25  |
+| • URLSpy                                 |       15 heures      |    @pepe8in     |  avant 05/01/25  |
+| • XMLBuilder                             |       15 heures      |    @sangeric    |  avant 05/01/25  |
+| • Interface utilisateur avec SDL         |       20 heures      |        ?        |  avant 05/02/25  |
 
 ## Structure du projet 
 
@@ -59,15 +59,14 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     ├── /src
     │   ├── main.c               // Point d'entrée de l'application
     │   ├── interface.c          // Gestion de l'interface utilisateur
-    │   ├── porteye.c            // Module Scanner de ports
-    │   ├── packetsnoop.c        // Module Analyseur de paquets
+    │   ├── porteye.c            // Module Scanner de Ports
+    │   ├── packetsnoop.c        // Module Analyseur de Paquets
     │   ├── filesecure.c         // Module Chiffrement/Déchiffrement
     │   ├── ddoswatcher.c        // Module Détection DDoS
     │   ├── urlspy.c             // Module Sniffer d'URL
-    │   └── xmlbuilder.c         // Module Gestionnaire de base de données
+    │   └── xmlbuilder.c         // Module Gestionnaire de Base de Données
     │
     ├── /include
-    │   ├── main.h
     │   ├── interface.h
     │   ├── porteye.h
     │   ├── packetsnoop.h
@@ -78,7 +77,6 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │
     ├── /tests
     │   ├── test_main.c
-    │   ├── test_interface.c
     │   ├── test_porteye.c
     │   ├── test_packetsnoop.c
     │   ├── test_filesecure.c
@@ -86,7 +84,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── test_urlspy.c
     │   └── test_xmlbuilder.c
     │
-    ├── /exe 
+    ├── /exe
     │   ├── main
     │   ├── porteye
     │   ├── packetsnoop
@@ -94,13 +92,11 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   ├── ddoswatcher
     │   ├── urlspy
     │   └── xmlbuilder
-    │
-    ├── Makefile
-    │
+    │   
+    ├── /.git
     ├── .gitignore
-    │
+    ├── Makefile
     ├── LICENSE
-    │
     └── README.md
 
 ## Convention de code 
@@ -178,7 +174,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     #define ERR_INVALID_PORT -1
     ```
 
-## Convention développement pour git
+## Convention git
 
 **Branch** :
 - `main` : Branche stable et prête à déployer.
@@ -186,22 +182,22 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `bugfix/<nom>` : Pour les corrections de bugs ou corrections urgentes. Exemple : `bugfix/fix-porteye`
 - `release/<version>` : Pour préparer une nouvelle version. Exemple : `release/v1.0`
 
-**Commit** :  `<type>: <message court>`
+**Commit** :  `<type>: <message court en anglais>`
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
-- `style` : Modifications de formatage ou refactorisation du code. Exemple : `style(scanner): alignement des indentations` / `style(scanner): simplification du code`
+- `style` : Modifications de formatage ou refactorisation du code. Exemple : `style(scanner): alignement des indentations / style(scanner): simplification du code`
 - `fix` : Correction de bug. Exemple : `fix(scanner): correction de la plage de ports`
 
 ## Méthodologie de développement d'un outil 
 
-1. Création d'une branche : feature/nom-outil
+1. Création d'une branche 
 2. Conception de la logique du programme
-3. Développement d'un exécutable en CLI : feat(nom-outil): message court
-5. Developpement de test unitaires : test(nom-outil): message court
+3. Développement d'un exécutable en CLI
+5. Developpement de test unitaires
 6. Revues de code en équipe
-7. Documentation des dépendances, de la conceptualisation et du développement de l'outil : docs(nom-outil): message court
-7. Merge dans la branche main 
+7. Documentation des dépendances, de la conceptualisation et du développement de l'outil
+8. Merge dans la branche main
 
 ## PortEye
 
