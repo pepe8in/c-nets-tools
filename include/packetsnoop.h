@@ -4,53 +4,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <netinet/ip.h>       // Pour les structures IP
-#include <netinet/tcp.h>      // Pour les structures TCP
-#include <netinet/udp.h>      // Pour les structures UDP
-#include <netinet/ip_icmp.h>  // Pour les structures ICMP
-#include <netinet/if_ether.h> // Pour la structure ethhdr
-#include <unistd.h>           // Pour la fonction close
+#include <ctype.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/ether.h>
+#include <netinet/if_ether.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
+#include <netinet/ip_icmp.h>
+#include <unistd.h>
+#include <net/if.h>
+
+#define BUFFER_SIZE 65536
 
 /**
- * @brief Traite un paquet réseau reçu.
+ * @brief
  * @param buffer Pointeur vers les données du paquet.
  * @param size Taille du paquet en octets.
  */
-void ProcessPacket(unsigned char* buffer, int size);
-
+void process(unsigned char* buffer, int size);
 /**
- * @brief Affiche les informations de l'en-tête IP d'un paquet.
+ * @brief 
  * @param buffer Pointeur vers les données du paquet.
  * @param size Taille du paquet en octets.
  */
-void print_ip_header(unsigned char* buffer, int size);
-
+void etherType (unsigned char* buffer, int size);
 /**
- * @brief Affiche les informations d'un paquet TCP.
+ * @brief
  * @param buffer Pointeur vers les données du paquet.
  * @param size Taille du paquet en octets.
  */
-void print_tcp_packet(unsigned char* buffer, int size);
-
+void icmpPacket(unsigned char* buffer, int size);
 /**
- * @brief Affiche les informations d'un paquet UDP.
+ * @brief 
  * @param buffer Pointeur vers les données du paquet.
  * @param size Taille du paquet en octets.
  */
-void print_udp_packet(unsigned char* buffer, int size);
-
+void tcpPacket(unsigned char* buffer, int size);
 /**
- * @brief Affiche les informations d'un paquet ICMP.
+ * @brief
  * @param buffer Pointeur vers les données du paquet.
  * @param size Taille du paquet en octets.
  */
-void print_icmp_packet(unsigned char* buffer, int size);
-
+void udpPacket(unsigned char* buffer, int size);
 /**
- * @brief Affiche une représentation hexadécimale et ASCII des données.
- * @param data Pointeur vers les données à afficher.
- * @param size Taille des données en octets.
+ * @brief
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
  */
-void PrintData(unsigned char* data, int size);
+void httpPacket(unsigned char* buffer, int size, int s);
 
-#endif // PACKETSNOOP_H
+#endif
+
+
