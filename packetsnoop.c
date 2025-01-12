@@ -1,4 +1,58 @@
-#include "../include/packetsnoop.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <arpa/inet.h>
+#include <netinet/if_ether.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
+#include <netinet/ip_icmp.h>
+#include <net/if.h>
+#include <linux/ipv6.h>
+
+#define BUFFER_SIZE 65536
+
+/**
+ * @brief Traite un paquet réseau capturé et identifie son type.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ */
+void process(unsigned char* buffer, int size);
+/**
+ * @brief Analyse et affiche les informations liées au protocole Ethernet.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ */
+void etherType(unsigned char* buffer, int size);
+/**
+ * @brief Analyse et affiche les informations d'un paquet ICMP.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ */
+void icmpPacket(unsigned char* buffer, int size);
+/**
+ * @brief Analyse et affiche les informations d'un paquet TCP.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ */
+void tcpPacket(unsigned char* buffer, int size);
+/**
+ * @brief Analyse et affiche les informations d'un paquet UDP.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ */
+void udpPacket(unsigned char* buffer, int size);
+/**
+ * @brief Analyse et affiche les données utiles d'un paquet HTTP ou HTTPS.
+ * @param buffer Pointeur vers les données du paquet.
+ * @param size Taille du paquet en octets.
+ * @param s Indique le port (80 pour HTTP, 443 pour HTTPS).
+ */
+void httpPacket(unsigned char* buffer, int size, int s);
 
 void process(unsigned char* buffer, int size) {
     etherType(buffer, size);
@@ -11,9 +65,11 @@ void process(unsigned char* buffer, int size) {
             tcpPacket(buffer, size);
             struct tcphdr *tcp_header = (struct tcphdr*)(buffer + ip_header->ihl * 4 + sizeof(struct ethhdr));
             if (ntohs(tcp_header->source) == 443 || ntohs(tcp_header->dest) == 443) {
-                httpPacket(buffer, size, 443);
+                int s = 443;
+                httpPacket(buffer, size, s);
             } else if (ntohs(tcp_header->source) == 80 || ntohs(tcp_header->dest) == 80) {
-                httpPacket(buffer, size, 80);
+                int s = 80;
+                httpPacket(buffer, size, s);
             }
             break;
         case IPPROTO_UDP:
@@ -27,19 +83,6 @@ void process(unsigned char* buffer, int size) {
 
 void etherType(unsigned char* buffer, int size) {
     struct ethhdr *eth_header = (struct ethhdr *)buffer;
-    printf("Adresse MAC destination : ");
-    for (int i = 0; i < 6; i++) {
-        printf("%02X", eth_header->h_dest[i]);
-        if (i != 5) printf(":");
-    }
-    printf("\n");
-    printf("Adresse MAC source : ");
-    for (int i = 0; i < 6; i++) {
-        printf("%02X", eth_header->h_source[i]);
-        if (i != 5) printf(":");
-    }
-    printf("\n");
-
     unsigned short proto = ntohs(eth_header->h_proto);
     switch (proto) {
         case ETH_P_IP:
@@ -47,9 +90,6 @@ void etherType(unsigned char* buffer, int size) {
             struct sockaddr_in source_ipv4, dest_ipv4;
             source_ipv4.sin_addr.s_addr = ip_header->saddr;
             dest_ipv4.sin_addr.s_addr = ip_header->daddr;
-            printf("(En-tête IPv4) Version              : %d\n", ip_header->version);
-            printf("(En-tête IPv4) Longueur d'en-tête   : %d octets\n", ip_header->ihl * 4);
-            printf("(En-tête IPv4) TTL                  : %d\n", ip_header->ttl);
             printf("(En-tête IPv4) Adresse source       : %s\n", inet_ntoa(source_ipv4.sin_addr));
             printf("(En-tête IPv4) Adresse destination  : %s\n", inet_ntoa(dest_ipv4.sin_addr));
             printf("(En-tête IPv4) Protocole            : %d", ip_header->protocol); 
@@ -59,29 +99,11 @@ void etherType(unsigned char* buffer, int size) {
             char source_ipv6[INET6_ADDRSTRLEN], dest_ipv6[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, &ipv6_header->saddr, source_ipv6, sizeof(source_ipv6));
             inet_ntop(AF_INET6, &ipv6_header->daddr, dest_ipv6, sizeof(dest_ipv6));
-            printf("(En-tête IPv6) Version              : 6\n");
-            printf("(En-tête IPv6) Classe de trafic     : 0x%02X\n", (ipv6_header->priority));
-            printf("(En-tête IPv6) Flow Label           : 0x%05X\n", ntohl(*(uint32_t *)ipv6_header) & 0x000FFFFF);
-            printf("(En-tête IPv6) Payload Length       : %d octets\n", ntohs(ipv6_header->payload_len));
-            printf("(En-tête IPv6) Hop Limit            : %d\n", ipv6_header->hop_limit);
             printf("(En-tête IPv6) Adresse source       : %s\n", source_ipv6);
             printf("(En-tête IPv6) Adresse destination  : %s\n", dest_ipv6);
             printf("(En-tête IPv6) Next Header          : %d", ipv6_header->nexthdr);
         break;
-        case ETH_P_ARP:
-            struct arphdr *arp_header = (struct arphdr*)(buffer + sizeof(struct ethhdr));
-            unsigned char *sender_mac = buffer + sizeof(struct ethhdr) + sizeof(struct arphdr);
-            unsigned char *sender_ip = sender_mac + 6;
-            unsigned char *target_mac = sender_ip + 4;
-            unsigned char *target_ip = target_mac + 6;
-            printf("(Protocole ARP) Matériel            : %d\n", ntohs(arp_header->ar_hrd));
-            printf("(Protocole ARP) Protocole           : 0x%04x\n", ntohs(arp_header->ar_pro));
-            printf("(Protocole ARP) Adresse IP émetteur : %d.%d.%d.%d\n", sender_ip[0], sender_ip[1], sender_ip[2], sender_ip[3]);
-            printf("(Protocole ARP) Adresse IP cible    : %d.%d.%d.%d\n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
-            printf("(Protocole ARP) Opération           : %s\n", (ntohs(arp_header->ar_op) == 1) ? "Requête" : "Réponse");
-        break;
         default:
-            printf("Protocole Ethernet non pris en charge");
         break;
     }
 }
@@ -133,7 +155,12 @@ void httpPacket(unsigned char* buffer, int size, int s) {
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    //if (argc != 2){
+    //    fprintf(stderr, "Usage : %s <interface>\n", argv[0]);
+    //    return 1;
+    //}
+
     struct sockaddr saddr;
     unsigned char *buffer = (unsigned char *)malloc(BUFFER_SIZE);
     int sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
@@ -142,7 +169,7 @@ int main() {
         return 1;
     }
 
-    printf("Capture des paquets réseau...\n");
+    //printf("Capture des paquets réseau...\n");
     while (1) {
         socklen_t saddr_len = sizeof(saddr);
         int data_size = recvfrom(sock_raw, buffer, BUFFER_SIZE, 0, &saddr, &saddr_len);
