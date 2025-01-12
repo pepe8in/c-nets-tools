@@ -17,6 +17,7 @@
 #include <netinet/ip_icmp.h>
 #include <unistd.h>
 #include <net/if.h>
+#include <linux/ipv6.h>
 
 #define BUFFER_SIZE 65536
 

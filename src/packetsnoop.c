@@ -2,13 +2,12 @@
 
 void process(unsigned char* buffer, int size) {
     etherType(buffer, size);
-    //ipPacket(buffer, size);
     struct iphdr *ip_header = (struct iphdr*)(buffer + sizeof(struct ethhdr));
     switch (ip_header->protocol) {
-        case 1:
+        case IPPROTO_ICMP:
             icmpPacket(buffer, size);
             break;
-        case 6:
+        case IPPROTO_TCP:
             tcpPacket(buffer, size);
             struct tcphdr *tcp_header = (struct tcphdr*)(buffer + ip_header->ihl * 4 + sizeof(struct ethhdr));
             if (ntohs(tcp_header->source) == 443 || ntohs(tcp_header->dest) == 443) {
@@ -19,33 +18,33 @@ void process(unsigned char* buffer, int size) {
                 httpPacket(buffer, size, s);
             }
             break;
-        case 17:
+        case IPPROTO_UDP:
             udpPacket(buffer, size);
             break;
         default:
-            printf(" --> informations du paquet indisponibles.\n");
+            printf(" --> informations du paquet non prises en charge.\n");
             break;
     }
 }
 
 void etherType(unsigned char* buffer, int size) {
     struct ethhdr *eth_header = (struct ethhdr *)buffer;
-    printf("Adresse MAC de destination : ");
+    printf("Adresse MAC destination : ");
     for (int i = 0; i < 6; i++) {
         printf("%02X", eth_header->h_dest[i]);
         if (i != 5) printf(":");
     }
     printf("\n");
-
     printf("Adresse MAC source : ");
     for (int i = 0; i < 6; i++) {
         printf("%02X", eth_header->h_source[i]);
         if (i != 5) printf(":");
     }
     printf("\n");
+
     unsigned short proto = ntohs(eth_header->h_proto);
     switch (proto) {
-        case 0x0800:
+        case ETH_P_IP:
             struct iphdr *ip_header = (struct iphdr*)(buffer + sizeof(struct ethhdr));
             struct sockaddr_in source_ipv4, dest_ipv4;
             source_ipv4.sin_addr.s_addr = ip_header->saddr;
@@ -56,22 +55,22 @@ void etherType(unsigned char* buffer, int size) {
             printf("(En-tête IPv4) Adresse source       : %s\n", inet_ntoa(source_ipv4.sin_addr));
             printf("(En-tête IPv4) Adresse destination  : %s\n", inet_ntoa(dest_ipv4.sin_addr));
             printf("(En-tête IPv4) Protocole            : %d", ip_header->protocol); 
-            break;
-        //case 0x86DD:
-        //    struct ipv6hdr *ipv6_header = (struct ipv6hdr*)(buffer + sizeof(struct ethhdr));
-        //    char source_ipv6[INET6_ADDRSTRLEN], dest_ipv6[INET6_ADDRSTRLEN];
-        //    inet_ntop(AF_INET6, &ipv6_header->saddr, source_ipv6, sizeof(source_ipv6));
-        //    inet_ntop(AF_INET6, &ipv6_header->daddr, dest_ipv6, sizeof(dest_ipv6));
-        //    printf("(En-tête IPv6) Version              : 6\n");
-        //    printf("(En-tête IPv6) Classe de trafic     : 0x%02X\n", (ipv6_header->priority));
-        //    printf("(En-tête IPv6) Flow Label           : 0x%05X\n", ntohl(*(uint32_t *)ipv6_header) & 0x000FFFFF);
-        //    printf("(En-tête IPv6) Payload Length       : %d octets\n", ntohs(ipv6_header->payload_len));
-        //    printf("(En-tête IPv6) Hop Limit            : %d\n", ipv6_header->hop_limit);
-        //    printf("(En-tête IPv6) Adresse source       : %s\n", source_ipv6);
-        //    printf("(En-tête IPv6) Adresse destination  : %s\n", dest_ipv6);
-        //    printf("(En-tête IPv6) Next Header          : %d", ipv6_header->nexthdr);
-        //    break;
-        case 0x0806:
+        break;
+        case ETH_P_IPV6:
+            struct ipv6hdr *ipv6_header = (struct ipv6hdr*)(buffer + sizeof(struct ethhdr));
+            char source_ipv6[INET6_ADDRSTRLEN], dest_ipv6[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET6, &ipv6_header->saddr, source_ipv6, sizeof(source_ipv6));
+            inet_ntop(AF_INET6, &ipv6_header->daddr, dest_ipv6, sizeof(dest_ipv6));
+            printf("(En-tête IPv6) Version              : 6\n");
+            printf("(En-tête IPv6) Classe de trafic     : 0x%02X\n", (ipv6_header->priority));
+            printf("(En-tête IPv6) Flow Label           : 0x%05X\n", ntohl(*(uint32_t *)ipv6_header) & 0x000FFFFF);
+            printf("(En-tête IPv6) Payload Length       : %d octets\n", ntohs(ipv6_header->payload_len));
+            printf("(En-tête IPv6) Hop Limit            : %d\n", ipv6_header->hop_limit);
+            printf("(En-tête IPv6) Adresse source       : %s\n", source_ipv6);
+            printf("(En-tête IPv6) Adresse destination  : %s\n", dest_ipv6);
+            printf("(En-tête IPv6) Next Header          : %d", ipv6_header->nexthdr);
+        break;
+        case ETH_P_ARP:
             struct arphdr *arp_header = (struct arphdr*)(buffer + sizeof(struct ethhdr));
             unsigned char *sender_mac = buffer + sizeof(struct ethhdr) + sizeof(struct arphdr);
             unsigned char *sender_ip = sender_mac + 6;
@@ -82,10 +81,10 @@ void etherType(unsigned char* buffer, int size) {
             printf("(Protocole ARP) Adresse IP émetteur : %d.%d.%d.%d\n", sender_ip[0], sender_ip[1], sender_ip[2], sender_ip[3]);
             printf("(Protocole ARP) Adresse IP cible    : %d.%d.%d.%d\n", target_ip[0], target_ip[1], target_ip[2], target_ip[3]);
             printf("(Protocole ARP) Opération           : %s\n", (ntohs(arp_header->ar_op) == 1) ? "Requête" : "Réponse");
-            break;
+        break;
         default:
-            printf("Protocole inconnu\n");
-            break;
+            printf("Protocole Ethernet non pris en charge");
+        break;
     }
 }
 
@@ -115,12 +114,7 @@ void udpPacket(unsigned char* buffer, int size) {
 }
 
 void httpPacket(unsigned char* buffer, int size, int s) {
-    char protocol[6];
-    if (s == 443) {
-        strcpy(protocol, "HTTPS");
-    } else if (s = 80) {
-        strcpy(protocol, "HTTP");
-    }
+    const char* protocol = (s == 443) ? "HTTPS" : "HTTP";
     struct iphdr *ip_header = (struct iphdr*)(buffer + sizeof(struct ethhdr));
     struct tcphdr *tcp_header = (struct tcphdr*)(buffer + ip_header->ihl * 4 + sizeof(struct ethhdr));
     unsigned char* data = buffer + sizeof(struct ethhdr) + ip_header->ihl * 4 + tcp_header->doff * 4;
