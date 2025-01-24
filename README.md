@@ -182,7 +182,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - `bugfix/<nom>` : Pour les corrections de bugs ou corrections urgentes. Exemple : `bugfix/fix-porteye`
 - `release/<version>` : Pour préparer une nouvelle version. Exemple : `release/v1.0`
 
-**Commit** :  `<type>: <message court en anglais>`
+**Commit** : 
 - `feat` : Nouvelle fonctionnalité. Exemple : `feat(porteye): ajout du module porteye`
 - `test` : Ajout/modification de tests. Exemple : `test(porteye): ajout des tests pour porteye`
 - `docs` : Mise à jour de la documentation. Exemple : `docs(porteye): ajout de la documentation de l'outil sur README.md`
