@@ -1,5 +1,7 @@
 #include "../include/porteye.h"
 
+bool verbose = true;
+
 int checkIp(const char *ip) {
     const char *REGEX_PATTERN = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
     regex_t regex;
@@ -13,7 +15,9 @@ int checkIp(const char *ip) {
 
     return_input = regexec(&regex, ip, 0, NULL, 0);
     if (return_input != 0) {
-        printf("Adresse IPv4 invalide : %s\n", ip);
+        if (verbose) {
+            printf("Adresse IPv4 invalide : %s\n", ip);
+        }
         return -1;
     }
 
@@ -23,7 +27,9 @@ int checkIp(const char *ip) {
 
 int checkPort(int start_port, int end_port) {
     if (start_port < 0 || start_port > MAX_PORTS || end_port < 0 || end_port > MAX_PORTS) {
-        fprintf(stderr, "Erreur : plage de ports invalide <0-65535>\n");
+        if (verbose) {
+            fprintf(stderr, "Erreur : plage de ports invalide <0-65535>\n");
+        }
         return -1;
     }
 
@@ -63,17 +69,23 @@ int createSocket(const char *ip, int port) {
 
 int scanPort(const char *ip, int port) {
     if (port < 0 || port > MAX_PORTS) {
-        perror("Port inexistant");
+        if (verbose) {
+            perror("Port inexistant");
+        }
         return -1;
     }
 
     int sock = createSocket(ip, port);
     if (sock < 0) {
-        printf("Port %d: Fermé ou erreur\n", port);
+        if (verbose) {
+            printf("Port %d: Fermé ou erreur\n", port);
+        }
         return 1;
     }
 
-    printf("Port %d: Ouvert\n", port);
+    if (verbose) {
+        printf("Port %d: Ouvert\n", port);
+    }
     close(sock);
     return 0;
 }
@@ -83,7 +95,9 @@ int scanRange(const char *ip, int start_port, int end_port) {
         return -1;
     }
 
-    printf("Scan des ports sur %s de %d à %d\n", ip, start_port, end_port);
+    if (verbose) {
+        printf("Scan des ports sur %s de %d à %d\n", ip, start_port, end_port);
+    }
     for (int port = start_port; port <= end_port; port++) {
         scanPort(ip, port);
     }
@@ -95,15 +109,21 @@ int scanOpenPort(const char *ip, int start_port, int end_port) {
         return -1;
     }
 
-    printf("Ports ouverts sur %s de %d à %d : ", ip, start_port, end_port);
+    if (verbose) {
+        printf("Ports ouverts sur %s de %d à %d : ", ip, start_port, end_port);
+    }
     for (int port = start_port; port <= end_port; port++) {
         int sock = createSocket(ip, port);
         if (sock >= 0) {
-            printf(" %d", port);
+            if (verbose) {
+                printf(" %d", port);
+            }
             close(sock);
         }
     }
-    printf("\n");
+    if (verbose) {
+        printf("\n");
+    }
     return 0;
 }
 
@@ -113,13 +133,20 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    verbose = false;
+    test_checkIp();
+    test_checkPort();
+    test_scanPort();
+    test_scanRange();
+    test_scanOpenPort();
+    verbose = true;
+
     const char *ip = argv[1];
     if (checkIp(ip) == -1) {
         return -1;
     }
 
     int select, port, start_port, end_port; 
-
     printf("Options :\n• 1 : Scan d'un seul port\n• 2 : Scan d'une plage de ports\n• 3 : Scan de tous les ports\n• 4 : Scan des ports well-known\n• 5 : Scan des ports registered\n• 6 : Scan des ports dynamic/private\n• 7 : Afficher les ports ouverts d'une plage\n>>> ");
     scanf("%d", &select);
 

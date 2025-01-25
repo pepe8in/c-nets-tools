@@ -50,7 +50,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 | • DDoSWatcher                            |       10 heures      |    @eafonso5    |  avant 05/01/25  |
 | • URLSpy                                 |       15 heures      |    @pepe8in     |  avant 05/01/25  |
 | • XMLBuilder                             |       15 heures      |    @sangeric    |  avant 05/01/25  |
-| • Interface utilisateur avec SDL         |       20 heures      |        ?        |  avant 05/02/25  |
+| • Interface utilisateur avec SDL         |       20 heures      |    @pepe8in     |  avant 05/02/25  |
 
 ## Structure du projet 
 
@@ -217,16 +217,6 @@ Permet de scanner les ports dits "dynamiques" ou "privés", utilisés par des ap
 7. **Afficher les ports ouverts dans une plage**
 Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont ouverts.
 
-### Bibliothèques utilisées :
-- ``stdio.h`` : Pour l'entrée et la sortie standard (affichage et lecture).
-- ``stdlib.h`` : Pour des fonctions utilitaires, telles que la gestion des erreurs.
-- ``string.h`` : Pour la manipulation de chaînes de caractères (si nécessaire).
-- ``regex.h`` : Pour la validation de l'adresse IP avec une expression régulière.
-- ``unistd.h`` : Pour la gestion des sockets et la fermeture de descripteurs de fichiers.
-- ``arpa/inet.h`` : Pour les fonctions de manipulation d'adresses IP (conversion entre format texte et binaire).
-- ``sys/socket.h`` : Pour la création et la gestion des connexions réseau via des sockets.
-- ``errno.h`` : Pour la gestion des erreurs système liées aux sockets.
-
 ## PacketSnoop
 ## FileSecure
 ## DDoSWatcher
@@ -237,5 +227,5 @@ Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont
 
 ## Crédit
 @pepe8in
-@E. S. 
-@E. A.
+@sangeric 
+@eafonso5

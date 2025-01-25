@@ -1,5 +1,9 @@
+#ifndef PORTEYE_H
+#define PORTEYE_H
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -7,6 +11,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <regex.h>
+
+extern bool verbose;
 
 #define TIMEOUT 1
 #define MAX_PORTS 65535
@@ -54,3 +60,25 @@ int scanRange(const char *ip, int start_port, int end_port);
  * @return -1 en cas d'erreur, 0 si le scan réussit.
  */
 int scanOpenPort(const char *ip, int start_port, int end_port);
+/*
+ * @brief Teste la fonction checkIp() avec différentes adresses IP.
+ */ 
+void test_checkIp();
+/*
+ * @brief Teste la fonction checkPort() avec différentes plages de ports.
+ */ 
+void test_checkPort();
+/*
+ * @brief Teste la fonction scanPort() avec des ports spécifiques sur localhost.
+ */ 
+void test_scanPort();
+/*
+ * @brief Teste la fonction scanRange() avec des plages de ports spécifiques sur localhost.
+ */ 
+void test_scanRange();
+/*
+ * @brief Teste la fonction scanOpenPort() avec une plage de ports sur localhost.
+ */ 
+void test_scanOpenPort();
+
+#endif

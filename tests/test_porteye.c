@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <assert.h>
-#include "../src/porteye.c"  
+#include "../include/porteye.h"
 
 void test_checkIp() {
     assert(checkIp("192.168.0.1") == 0);
@@ -34,15 +32,5 @@ void test_scanRange() {
 
 void test_scanOpenPort() {
     assert(scanOpenPort("127.0.0.1", 80, 443) == 0);  
-    printf("test_scanOpenPort() passe\n");
-}
-
-int main() {
-    test_checkIp();
-    test_checkPort();
-    test_scanPort();
-    test_scanRange();
-    test_scanOpenPort();
-    printf("Tous les tests ont réussi\n");
-    return 0;
+    printf("test_scanOpenPort() passe\n\n");
 }
