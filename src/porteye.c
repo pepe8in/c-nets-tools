@@ -13,45 +13,59 @@ void on_confirm_button_clicked(GtkWidget *button, gpointer data) {
     GtkWidget *grid = GTK_WIDGET(data);
     GList *children = gtk_container_get_children(GTK_CONTAINER(grid));
 
-    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 0)))) {
-        printf("1");
-        //printf("Quel port scanner ? ");
-        //scanf("%d", &port);
-        //scanPort(ip, port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 1)))) {
-        printf("2");
-        //printf("Quelle plage scanner ? ");
-        //scanf("%d %d", &start_port, &end_port);
-        //scanRange(ip, start_port, end_port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 2)))) {
-        printf("3");
-        //start_port = 0;
-        //end_port = MAX_PORTS;
-        //scanRange(ip, start_port, end_port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 3)))) {
-        printf("4");
-        //start_port = 0;
-        //end_port = 1023;
-        //scanRange(ip, start_port, end_port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 4)))) {
-        printf("5");
-        //start_port = 1024;
-        //end_port = 49151;
-        //scanRange(ip, start_port, end_port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 5)))) {
-        printf("6");
-        //start_port = 49151;
-        //end_port = MAX_PORTS;
-        //scanRange(ip, start_port, end_port);
-    } else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_list_nth_data(children, 6)))) {
-        printf("7");
-        //printf("Quelle plage scanner ? ");
-        //scanf("%d %d", &start_port, &end_port);
-        //scanOpenPort(ip, start_port, end_port);
+    for (int i = 0; i < g_list_length(children); i++) {
+        GtkWidget *child = GTK_WIDGET(g_list_nth_data(children, i));
+        if (GTK_IS_TOGGLE_BUTTON(child)) {
+            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(child))) {
+                switch (i) {
+                    case 0:
+                        printf("1\n");
+                        // printf("Quel port scanner ? ");
+                        // scanf("%d", &port);
+                        // scanPort(ip, port);
+                        break;
+                    case 1:
+                        printf("2\n");
+                        // printf("Quelle plage scanner ? ");
+                        // scanf("%d %d", &start_port, &end_port);
+                        // scanRange(ip, start_port, end_port);
+                        break;
+                    case 2:
+                        printf("3\n");
+                        // start_port = 0;
+                        // end_port = MAX_PORTS;
+                        // scanRange(ip, start_port, end_port);
+                        break;
+                    case 3:
+                        printf("4\n");
+                        // start_port = 0;
+                        // end_port = 1023;
+                        // scanRange(ip, start_port, end_port);
+                        break;
+                    case 4:
+                        printf("5\n");
+                        // start_port = 1024;
+                        // end_port = 49151;
+                        // scanRange(ip, start_port, end_port);
+                        break;
+                    case 5:
+                        printf("6\n");
+                        // start_port = 49151;
+                        // end_port = MAX_PORTS;
+                        // scanRange(ip, start_port, end_port);
+                        break;
+                    case 6:
+                        printf("7\n");
+                        // printf("Quelle plage scanner ? ");
+                        // scanf("%d %d", &start_port, &end_port);
+                        // scanOpenPort(ip, start_port, end_port);
+                        break;
+                }
+            }
+        }
     }
     g_list_free(children);
 }
-
 
 char *cleanString(const char *str) {
     char *cleaned = g_strdup(str);
