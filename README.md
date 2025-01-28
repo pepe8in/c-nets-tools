@@ -194,10 +194,10 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 1. Création d'une branche 
 2. Conception de la logique du programme
 3. Développement d'un exécutable en CLI
-5. Developpement de test unitaires
-6. Revues de code en équipe
-7. Documentation des dépendances, de la conceptualisation et du développement de l'outil
-8. Merge dans la branche main
+4. Developpement de test unitaires
+5. Revues de code en équipe
+6. Documentation des dépendances, de la conceptualisation et du développement de l'outil
+7. Merge dans la branche main
 
 ## PortEye
 
@@ -226,5 +226,5 @@ Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont
 
 ## Crédit
 @pepe8in
-@sangeric 
+@sangeric
 @eafonso5
