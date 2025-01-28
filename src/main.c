@@ -1,89 +1,63 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
-#include "interface.c"
+#include <stdlib.h>
+#include <string.h>
+#include <regex.h>
+#include <glib.h>
+#include <gtk/gtk.h>
+#include "../include/porteye.h"
 
 int main(int argc, char *argv[]) {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0 || TTF_Init() < 0) {
-        fprintf(stderr, "Erreur d'initialisation SDL ou TTF : %s\n", SDL_GetError());
-        return 1;
-    }
+    gtk_init(&argc, &argv);
 
-    SDL_Window *window = SDL_CreateWindow("C-NETS T00LS", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_RESIZABLE);
-    if (!window) {
-        fprintf(stderr, "Erreur de création de la fenêtre : %s\n", SDL_GetError());
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), "C-NETS T00LS");
+    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add(GTK_CONTAINER(window), box);
+    gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_BOX(box), grid, FALSE, FALSE, 10);
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer) {
-        fprintf(stderr, "Erreur de création du renderer : %s\n", SDL_GetError());
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    TTF_Font *font = TTF_OpenFont("/usr/share/fonts/nerd-fonts-git/TTF/HackNerdFont-Regular.ttf", 20);
-    if (!font) {
-        fprintf(stderr, "Erreur de chargement de la police : %s\n", TTF_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        TTF_Quit();
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_Color text_color = {0, 0, 0};
-    SDL_Color bg_color = {226, 233, 192, 255};
-    Button buttons[6] = {
-        {{150, 200, 200, 50}, "porteye"},
-        {{450, 200, 200, 50}, "packetsnoop"},
-        {{150, 300, 200, 50}, "filesecure"},
-        {{450, 300, 200, 50}, "ddoswatcher"},
-        {{150, 400, 200, 50}, "urlspy"},
-        {{450, 400, 200, 50}, "xmlbuilder"}
-    };
-
-    SDL_StartTextInput();
-    char user_input[256] = "";
-    SDL_Event event;
-    int running = 1, current_screen = 0;
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            running = manageEvent(&event, buttons, 6, renderer, font, bg_color, &current_screen, user_input);
-        }
-        SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
-        SDL_RenderClear(renderer);
-        switch (current_screen) {
-            case 0:
-                displayHome(renderer, buttons, 6, font, text_color); 
-            break;
-            case 1:
-                displayPorteye(renderer, font, user_input);
-            break;
-            case 2:
-            break;
-            case 3:
-            break;
-            case 4:
-            break;
-            case 5:
-            break;
-            case 6: 
-            break;
+    const char *button_labels[] = { "porteye", "packetsnoop", "filesecure", "ddoswatcher", "urlspy", "xmlbuilder" };
+    for (int i = 0; i < 6; i++) {
+        GtkWidget *button = gtk_button_new_with_label(button_labels[i]);
+        switch (i) {
+            case 0 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
+            case 1 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
+            case 2 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
+            case 3 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
+            case 4 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
+            case 5 :
+                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                break;
             default:
         }
-        SDL_RenderPresent(renderer);
+        gtk_widget_set_size_request(button, 300, 40);
+        int row = i / 2; 
+        int col = i % 2;
+        gtk_grid_attach(GTK_GRID(grid), button, col, row, 1, 1);
     }
 
-    TTF_CloseFont(font);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    TTF_Quit();
-    SDL_Quit();
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    gtk_widget_show_all(window);
+    gtk_main();
+
     return 0;
 }
-
