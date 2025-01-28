@@ -1,8 +1,39 @@
 // Utilisation :
 // ./filesecure encrypt input.txt output.enc
 // ./filesecure decrypt output.enc decrypted.txt
+#ifndef FILE_SECURE_H
+#define FILE_SECURE_H
 
-#include "../include/FileSecure.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <openssl/aes.h>
+
+#define ERR_FILE_OPEN -1
+#define ERR_AES_KEY -2
+
+/*
+ * @brief Encrypts a file using AES in the specified mode.
+ * @param input_file Path to the input file.
+ * @param output_file Path to the output (encrypted) file.
+ * @param key Encryption key (256 bits).
+ * @param iv Initialization vector (16 bytes, used in CBC mode).
+ * @return int Returns 0 on success, or an error code on failure.
+ */
+int encryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv);
+
+/*
+ * @brief Decrypts a file using AES in the specified mode.
+ * @param input_file Path to the input (encrypted) file.
+ * @param output_file Path to the output (decrypted) file.
+ * @param key Decryption key (256 bits).
+ * @param iv Initialization vector (16 bytes, used in CBC mode).
+ * @return int Returns 0 on success, or an error code on failure.
+ */
+int decryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv);
+
+#endif // FILE_SECURE_H
 
 #define AES_KEY_SIZE 256
 #define AES_BLOCK_SIZE 16
@@ -90,7 +121,6 @@ int decryptFile(const char *input_file, const char *output_file, const unsigned 
 }
 
 int main(int argc, char *argv[]) {
-    // Vérification du nombre d'arguments
     if (argc != 4) {
         printf("Usage: %s [encrypt/decrypt] [input_file] [output_file]\n", argv[0]);
         return 1;
@@ -100,11 +130,9 @@ int main(int argc, char *argv[]) {
     const char *input_file = argv[2];
     const char *output_file = argv[3];
 
-    // Clé et vecteur d'initialisation (IV) - pour l'exemple uniquement
-    unsigned char key[32] = "12345678901234567890123456789012"; // 256 bits
-    unsigned char iv[16] = "1234567890123456";                  // 128 bits
+    unsigned char key[32] = "12345678901234567890123456789012";
+    unsigned char iv[16] = "1234567890123456"; 
 
-    // Vérification de l'opération spécifiée (encrypt ou decrypt)
     if (strcmp(operation, "encrypt") == 0) {
         printf("Encrypting file: %s\n", input_file);
         int result = encryptFile(input_file, output_file, key, iv);
