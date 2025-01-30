@@ -219,6 +219,22 @@ Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont
 
 ## PacketSnoop
 ## FileSecure
+
+### Fonctions principales :
+1. **Chiffrement de fichiers**  
+  FileSecure permet de sécuriser n'importe quel fichier en appliquant un chiffrement robuste basé sur l'algorithme **AES-256**.  
+  Le chiffrement garantit que seules les personnes disposant de la clé appropriée peuvent accéder aux données.  
+  Cette fonctionnalité est essentielle pour protéger les fichiers sensibles contre l'accès non autorisé.  
+2. **Déchiffrement de fichiers**  
+  Les fichiers chiffrés avec FileSecure peuvent être restaurés dans leur état d'origine en utilisant la même clé et le même vecteur d'initialisation (IV).  
+  Le processus de déchiffrement garantit une récupération fidèle des données, sans perte d'information.  
+  Cette fonctionnalité est particulièrement utile pour le stockage sécurisé et la transmission de fichiers confidentiels.  
+3. **Compatibilité avec différents formats**  
+  FileSecure prend en charge le chiffrement et le déchiffrement de **fichiers texte et binaires**, ce qui permet de protéger aussi bien des documents que des fichiers multimédias, des archives ou des exécutables.  
+4. **Modes de chiffrement configurables**  
+  Le programme peut être adapté pour utiliser différents **modes de chiffrement AES**, tels que **ECB (Electronic Codebook)** et **CBC (Cipher Block Chaining)**.  
+  Le mode **CBC** est recommandé pour une meilleure sécurité, car il introduit un vecteur d'initialisation (IV) qui empêche l'analyse des blocs répétitifs dans les fichiers.  
+
 ## DDoSWatcher
 ## URLSpy
 ## XMLBuilder
