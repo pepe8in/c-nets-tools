@@ -18,13 +18,18 @@
 #define MAX_PORTS 65535
 
 extern bool verbose;
+static GtkWidget *open_windows[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
 
+void destroyWindow(GtkWidget *widget, gpointer data);
+void clearContainer(GtkWidget *widget);
+void buttonClicked(GtkWidget *widget, gpointer data);
 void checkIp(GtkWidget *widget, gpointer data);
 void porteye(GtkWidget *widget, gpointer data);
 
-int checkPort(int start_port, int end_port);
+void scanPort(GtkWidget *widget, gpointer data);
 int createSocket(const char *ip, int port); 
-int scanPort(const char *ip, int port);
+
+int checkPort(const char *ip, int port);
 int scanRange(const char *ip, int start_port, int end_port);
 int scanOpenPort(const char *ip, int start_port, int end_port);
 void test_checkIp();
