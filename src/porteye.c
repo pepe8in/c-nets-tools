@@ -6,31 +6,18 @@ typedef struct {
     GtkWidget *grid;
     GtkWidget *entry;
     GtkWidget *window;
+    char *ip_cleaned;
 } AppData;
+
 
 void destroyWindow(GtkWidget *window, gpointer data) {
     int index = GPOINTER_TO_INT(data);
     open_windows[index] = NULL;
 }
 
-//void clearContainer(GtkWidget *container) {
-//    GList *children = gtk_container_get_children(GTK_CONTAINER(container));
-//    for (GList *iter = children; iter != NULL; iter = iter->next) {
-//        gtk_widget_destroy(GTK_WIDGET(iter->data));
-//    }
-//    g_list_free(children);
-//}
-
 void clearContainer(GtkWidget *container) {
-    if (!GTK_IS_CONTAINER(container)) {
-        g_printerr("clearContainer: container invalide\n");
-        return;
-    }
-
-    GList *children, *iter;
-    children = gtk_container_get_children(GTK_CONTAINER(container));
-
-    for (iter = children; iter != NULL; iter = iter->next) {
+    GList *children = gtk_container_get_children(GTK_CONTAINER(container));
+    for (GList *iter = children; iter != NULL; iter = iter->next) {
         gtk_widget_destroy(GTK_WIDGET(iter->data));
     }
     g_list_free(children);
@@ -56,17 +43,17 @@ int createSocket(const char *ip, int port) {
         perror("Erreur de création de socket");
         return -1;
     }
-    
+
     struct timeval tv;
     tv.tv_sec = TIMEOUT;
     tv.tv_usec = 0;
     setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (const char*)&tv, sizeof(tv));
-    
+
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
     inet_pton(AF_INET, ip, &server.sin_addr);
-    
+
     int result = connect(sock, (struct sockaddr *)&server, sizeof(server));
     if (result < 0) {
         close(sock);
@@ -84,7 +71,7 @@ void scanPort(GtkWidget *button, gpointer data) {
     const char *port_text = gtk_entry_get_text(GTK_ENTRY(port_entry));
     int port = atoi(port_text);
 
-    if (port <= 0 || port > 65535) {
+    if (port <= 0 || port > MAX_PORTS) {
         gtk_label_set_text(GTK_LABEL(result_label), "Port invalide. Entrez un nombre entre 1 et 65535.");
         return;
     }
@@ -98,44 +85,46 @@ void scanPort(GtkWidget *button, gpointer data) {
     close(sock);
     gtk_label_set_text(GTK_LABEL(result_label), "Port ouvert !");
 }
+
 void buttonClicked(GtkWidget *button, gpointer data) {
     AppData *appData = (AppData *)data;
     GtkWidget *grid = appData->grid;
+    const char *label = NULL;
+    GList *children = gtk_container_get_children(GTK_CONTAINER(appData->grid));
+    for (GList *iter = children; iter != NULL; iter = iter->next) {
+        if (GTK_IS_RADIO_BUTTON(iter->data) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(iter->data))) {
+            GtkWidget *child = gtk_bin_get_child(GTK_BIN(iter->data)); 
+            const char *label = gtk_label_get_text(GTK_LABEL(child));
+            const char *ip = appData->ip_cleaned;
 
-    GtkWidget *active_radio = NULL;
-    GList *children = gtk_container_get_children(GTK_CONTAINER(grid));
+            if (g_strcmp0(label, "Scan d'un seul port") == 0) {
+                clearContainer(grid);
+        
+                GtkWidget *ip_label = gtk_label_new(ip);
+                gtk_grid_attach(GTK_GRID(grid), ip_label, 0, 1, 2, 1);
 
-    for (GList *child = children; child != NULL; child = child->next) {
-        if (GTK_IS_TOGGLE_BUTTON(child->data) && gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(child->data))) {
-            active_radio = GTK_WIDGET(child->data);
+                GtkWidget *port_label = gtk_label_new("Entrez un port à scanner :");
+                gtk_grid_attach(GTK_GRID(grid), port_label, 0, 2, 2, 1);
+
+                GtkWidget *port_entry = gtk_entry_new();
+                gtk_entry_set_placeholder_text(GTK_ENTRY(port_entry), "Ex: 80");
+                gtk_grid_attach(GTK_GRID(grid), port_entry, 0, 3, 2, 1);
+
+                GtkWidget *scan_button = gtk_button_new_with_label("Scanner");
+                gtk_grid_attach(GTK_GRID(grid), scan_button, 0, 4, 2, 1);
+
+                GtkWidget *result_label = gtk_label_new("");
+                gtk_grid_attach(GTK_GRID(grid), result_label, 0, 5, 2, 1);
+
+                g_signal_connect(scan_button, "clicked", G_CALLBACK(scanPort), grid);
+                gtk_widget_show_all(grid);
+            }
             break;
         }
     }
     g_list_free(children);
-
-    clearContainer(grid);
-
-    if (active_radio) {
-        const char *label = gtk_button_get_label(GTK_BUTTON(active_radio));
-        if (g_strcmp0(label, "Scan d'un seul port") == 0) {
-            GtkWidget *port_label = gtk_label_new("Entrez un port à scanner :");
-            gtk_grid_attach(GTK_GRID(grid), port_label, 0, 1, 2, 1);
-
-            GtkWidget *port_entry = gtk_entry_new();
-            gtk_entry_set_placeholder_text(GTK_ENTRY(port_entry), "Ex: 80");
-            gtk_grid_attach(GTK_GRID(grid), port_entry, 0, 2, 2, 1);
-
-            GtkWidget *scan_button = gtk_button_new_with_label("Scanner");
-            gtk_grid_attach(GTK_GRID(grid), scan_button, 0, 3, 2, 1);
-
-            GtkWidget *result_label = gtk_label_new("");
-            gtk_grid_attach(GTK_GRID(grid), result_label, 0, 4, 2, 1);
-
-            g_signal_connect(scan_button, "clicked", G_CALLBACK(scanPort), grid);
-        } 
-    }
-    gtk_widget_show_all(grid);
 }
+
 
 void checkIp(GtkWidget *button, gpointer data) {
     GtkWidget *entry = GTK_WIDGET(data);
@@ -159,12 +148,6 @@ void checkIp(GtkWidget *button, gpointer data) {
         const char *ip_cleaned = cleanString(ip);
         GtkWidget *window = gtk_widget_get_toplevel(entry);
         GtkWidget *box = gtk_widget_get_parent(entry);
-        // GList *children = gtk_container_get_children(GTK_CONTAINER(box));
-
-        // for (GList *iter = children; iter != NULL; iter = iter->next) {
-        //    gtk_widget_destroy(GTK_WIDGET(iter->data));
-        //}
-        //g_list_free(children);
 
         clearContainer(box);
 
@@ -173,44 +156,60 @@ void checkIp(GtkWidget *button, gpointer data) {
         gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
         gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
         gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+
         gtk_grid_attach(GTK_GRID(box), grid, 0, 0, 1, 1);
-        gtk_box_pack_start(GTK_BOX(box), grid, TRUE, TRUE, 10);
 
         GtkWidget *ip_label = gtk_label_new(ip_cleaned);
+        gtk_grid_attach(GTK_GRID(grid), ip_label, 0, 1, 2, 1);
+
         GtkWidget *space1 = gtk_label_new("");
-        GtkWidget *radio1 = gtk_radio_button_new_with_label_from_widget(NULL, "Scan d'un seul port");
-        GtkWidget *radio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Scan d'une plage de ports");
-        GtkWidget *radio3 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Scan de tous les ports");
-        GtkWidget *radio4 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Scan des ports well-known");
-        GtkWidget *radio5 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Scan des ports registered");
-        GtkWidget *radio6 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Scan des ports dynamic/private");
-        GtkWidget *radio7 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio1), "Afficher les ports ouverts d'une plage");
+        gtk_grid_attach(GTK_GRID(grid), space1, 0, 2, 2, 1);
+
+        const char *options[] = {
+            "Scan d'un seul port",
+            "Scan d'une plage de ports",
+            "Scan de tous les ports",
+            "Scan des ports well-known",
+            "Scan des ports registered",
+            "Scan des ports dynamic/private",
+            "Afficher les ports ouverts d'une plage"
+        };
+
+        GtkWidget *prev_radio = NULL;
+        GtkWidget *radio_buttons[7];  
+
+        for (int i = 0; i < 7; i++) {
+            GtkWidget *radio;
+            if (prev_radio == NULL) {
+                radio = gtk_radio_button_new_with_label(NULL, options[i]);
+            } else {
+                radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(prev_radio), options[i]);
+            }
+            prev_radio = radio;
+            radio_buttons[i] = radio;  
+            gtk_grid_attach(GTK_GRID(grid), radio, i % 2, 3 + (i / 2), 1, 1);
+        }
+        
         GtkWidget *space2 = gtk_label_new("");
+        gtk_grid_attach(GTK_GRID(grid), space2, 0, 7, 2, 1);
+
         GtkWidget *confirm_button = gtk_button_new_with_label("Confirmer");
+        gtk_widget_set_halign(confirm_button, GTK_ALIGN_CENTER);
+        gtk_grid_attach(GTK_GRID(grid), confirm_button, 0, 8, 2, 1);
 
         AppData *appData = g_malloc(sizeof(AppData));
         appData->grid = grid;
         appData->entry = entry;
         appData->window = window;
+        appData->ip_cleaned = g_strdup(ip_cleaned);
 
         g_signal_connect(confirm_button, "clicked", G_CALLBACK(buttonClicked), appData);
-        gtk_grid_attach(GTK_GRID(grid), ip_label, 0, 1, 2, 1);
-        gtk_grid_attach(GTK_GRID(grid), space1, 0, 2, 2, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio1, 0, 3, 1, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio2, 1, 3, 1, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio3, 0, 4, 1, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio4, 1, 4, 1, 1); 
-        gtk_grid_attach(GTK_GRID(grid), radio5, 0, 5, 1, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio6, 1, 5, 1, 1);
-        gtk_grid_attach(GTK_GRID(grid), radio7, 0, 6, 2, 1); 
-        gtk_grid_attach(GTK_GRID(grid), space2, 0, 7, 2, 1);
-        gtk_grid_attach(GTK_GRID(grid), confirm_button, 0, 8, 2, 1);
-        gtk_widget_set_halign(radio7, GTK_ALIGN_CENTER);
 
         gtk_widget_show_all(window);
     }
     regfree(&regex);
 }
+
 
 void porteye(GtkWidget *porteye, gpointer data) {
     const char *title = gtk_button_get_label(GTK_BUTTON(porteye));
@@ -246,7 +245,7 @@ void porteye(GtkWidget *porteye, gpointer data) {
     gtk_grid_attach(GTK_GRID(grid), space1, 0, 2, 2, 1); 
     
     GtkWidget *entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "192.168.1.1");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Ex: 192.168.1.1");
     gtk_entry_set_max_length(GTK_ENTRY(entry), 14);
     gtk_grid_attach(GTK_GRID(grid), entry, 0, 3, 2, 1);
     
