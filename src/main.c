@@ -1,5 +1,6 @@
-#include "../include/filesecure.h"
 #include "../include/porteye.h"
+#include "../include/filesecure.h"
+#include "../include/ddoswatcher.h"
 
 
 int main(int argc, char *argv[]) {
@@ -37,7 +38,7 @@ int main(int argc, char *argv[]) {
                 g_signal_connect(button, "clicked", G_CALLBACK(filesecure), GINT_TO_POINTER(i));
                 break;
             case 3 :
-                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                g_signal_connect(button, "clicked", G_CALLBACK(ddoswatcher), GINT_TO_POINTER(i));
                 break;
             case 4 :
                 g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));

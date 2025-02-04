@@ -165,7 +165,7 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
 }
 
 void buttonClick(GtkWidget *widget, gpointer data) {
-    AppData *appData = (AppData *)data;
+    FileSecure *appData = (FileSecure *)data;
     const char *input_file = gtk_entry_get_text(GTK_ENTRY(appData->entry_source));
     const char *output_file = gtk_entry_get_text(GTK_ENTRY(appData->entry_dest));
     const char *password = gtk_entry_get_text(GTK_ENTRY(appData->entry_password));
@@ -260,7 +260,7 @@ void filesecure(GtkWidget *widget, gpointer data) {
     gtk_widget_set_size_request(button, 300, 30);
     gtk_grid_attach(GTK_GRID(grid), button, 0, 12, 2, 1);
 
-    AppData *appData = g_new(AppData, 1);
+    FileSecure *appData = g_new(FileSecure, 1);
     appData->entry_source = entry_source;
     appData->entry_dest = entry_dest;
     appData->entry_password = entry_password;
