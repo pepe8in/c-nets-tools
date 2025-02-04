@@ -1,3 +1,4 @@
+#include "../include/filesecure.h"
 #include "../include/porteye.h"
 
 
@@ -8,12 +9,12 @@ int main(int argc, char *argv[]) {
     gtk_window_set_title(GTK_WINDOW(window), "C-NETS T00LS");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
-    
+
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_container_add(GTK_CONTAINER(window), box);
     gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
-    
+
     GtkWidget *grid = gtk_grid_new();
     gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
                 g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
                 break;
             case 2 :
-                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                g_signal_connect(button, "clicked", G_CALLBACK(filesecure), GINT_TO_POINTER(i));
                 break;
             case 3 :
                 g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
@@ -57,4 +58,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-

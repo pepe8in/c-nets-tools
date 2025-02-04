@@ -3,11 +3,6 @@
 
 // bool verbose = true; 
 
-void destroyWindow(GtkWidget *window, gpointer data) {
-    int index = GPOINTER_TO_INT(data);
-    open_windows[index] = NULL;
-}
-
 void clearContainer(GtkWidget *container) {
     GList *children = gtk_container_get_children(GTK_CONTAINER(container));
     for (GList *iter = children; iter != NULL; iter = iter->next) {

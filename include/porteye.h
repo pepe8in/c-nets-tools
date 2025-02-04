@@ -13,12 +13,12 @@
 #include <regex.h>
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "interface.h"
 
 #define TIMEOUT 1
 #define MAX_PORTS 65535
 
 // extern bool verbose;
-static GtkWidget *open_windows[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
 
 typedef struct {
     GtkWidget *grid;
@@ -34,7 +34,6 @@ typedef struct {
     GtkWidget *result_textview;
 } ScanData;
 
-void destroyWindow(GtkWidget *widget, gpointer data);
 void clearContainer(GtkWidget *widget);
 char *cleanString(const char *str);
 int createSocket(const char *ip, int port);

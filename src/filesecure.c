@@ -1,23 +1,26 @@
 #include "../include/filesecure.h"
 
-void deriveKeyAndIV(const char *password, unsigned char *key, unsigned char *iv, unsigned char *salt) {
-    if (!RAND_bytes(salt, 8)) {
-        fprintf(stderr, "Erreur : Impossible de générer un sel aléatoire\n");
-        exit(1);
-    }
 
+void deriveKeyAndIV(const char *password, unsigned char *key, unsigned char *iv, unsigned char *salt, int generate) {
+    if (generate) {
+        if (!RAND_bytes(salt, 8)) {
+            fprintf(stderr, "Erreur : Impossible de générer un sel aléatoire\n");
+            exit(1);
+        }
+    }
     if (!PKCS5_PBKDF2_HMAC(password, strlen(password), salt, 8, 10000, EVP_sha256(), 32, key)) {
         fprintf(stderr, "Erreur : Échec de la dérivation de la clé\n");
         exit(1);
     }
-
-    if (!RAND_bytes(iv, 16)) {
-        fprintf(stderr, "Erreur : Échec de la génération d'un IV aléatoire\n");
-        exit(1);
+    if (generate) {
+        if (!RAND_bytes(iv, 16)) {
+            fprintf(stderr, "Erreur : Échec de la génération d'un IV aléatoire\n");
+            exit(1);
+        }
     }
 }
 
-int encryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv) {
+int encryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv, const unsigned char *salt) {
     FILE *input = fopen(input_file, "rb");
     if (input == NULL) {
         perror("Erreur : Impossible d'ouvrir le fichier d'entrée");
@@ -46,8 +49,8 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
         fclose(output);
         return ERR_AES_KEY;
     }
-    unsigned char salt[8];
-    fwrite(salt, 1, sizeof(salt), output);
+
+    fwrite(salt, 1, 8, output);
     fwrite(iv, 1, 16, output);
 
     unsigned char buffer_in[BUFFER_SIZE];
@@ -79,8 +82,7 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
     fclose(output);
     return 0;
 }
-
-int decryptFile(const char *input_file, const char *output_file, const unsigned char *key, unsigned char *iv) {
+int decryptFile(const char *input_file, const char *output_file, const char *password, unsigned char *key, unsigned char *iv) {
     FILE *input = fopen(input_file, "rb");
     if (input == NULL) {
         perror("Erreur : Impossible d'ouvrir le fichier d'entrée");
@@ -103,8 +105,25 @@ int decryptFile(const char *input_file, const char *output_file, const unsigned 
     }
 
     unsigned char salt[8];
-    fread(salt, 1, sizeof(salt), input);
-    fread(iv, 1, 16, input);
+
+    if (fread(salt, 1, 8, input) != 8) {
+        fprintf(stderr, "Erreur : Impossible de lire le sel\n");
+        EVP_CIPHER_CTX_free(ctx);
+        fclose(input);
+        fclose(output);
+        return ERR_AES_KEY;
+    }
+
+    if (fread(iv, 1, 16, input) != 16) {
+        fprintf(stderr, "Erreur : Impossible de lire l'IV\n");
+        EVP_CIPHER_CTX_free(ctx);
+        fclose(input);
+        fclose(output);
+        return ERR_AES_KEY;
+    }
+
+    deriveKeyAndIV(password, key, iv, salt, 0);
+
     if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
         fprintf(stderr, "Erreur : Échec de l'initialisation du déchiffrement\n");
         EVP_CIPHER_CTX_free(ctx);
@@ -119,6 +138,7 @@ int decryptFile(const char *input_file, const char *output_file, const unsigned 
 
     while ((len = fread(buffer_in, 1, BUFFER_SIZE, input)) > 0) {
         if (EVP_DecryptUpdate(ctx, buffer_out, &plain_len, buffer_in, len) != 1) {
+            ERR_print_errors_fp(stderr);
             fprintf(stderr, "Erreur : Échec du déchiffrement\n");
             EVP_CIPHER_CTX_free(ctx);
             fclose(input);
@@ -129,6 +149,7 @@ int decryptFile(const char *input_file, const char *output_file, const unsigned 
     }
 
     if (EVP_DecryptFinal_ex(ctx, buffer_out, &plain_len) != 1) {
+        ERR_print_errors_fp(stderr);  // Affiche les erreurs OpenSSL
         fprintf(stderr, "Erreur : Échec de la finalisation du déchiffrement\n");
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
@@ -143,47 +164,109 @@ int decryptFile(const char *input_file, const char *output_file, const unsigned 
     return 0;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        printf("Usage: %s [encrypt/decrypt] [fichier_entree] [fichier_sortie]\n", argv[0]);
-        return 1;
-    }
+void buttonClick(GtkWidget *widget, gpointer data) {
+    AppData *appData = (AppData *)data;
+    const char *input_file = gtk_entry_get_text(GTK_ENTRY(appData->entry_source));
+    const char *output_file = gtk_entry_get_text(GTK_ENTRY(appData->entry_dest));
+    const char *password = gtk_entry_get_text(GTK_ENTRY(appData->entry_password));
+    gboolean encrypt = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(appData->radio_encrypt));
 
-    const char *operation = argv[1];
-    const char *input_file = argv[2];
-    const char *output_file = argv[3];
-    unsigned char key[32];
-    unsigned char iv[16];
-    unsigned char salt[8];
+    unsigned char key[32], iv[16], salt[8];
+    deriveKeyAndIV(password, key, iv, salt, 1);
 
-    char password[64];
-    printf("Entrez un mot de passe (64caractères max) : ");
-    scanf("%63s", password);
-    deriveKeyAndIV(password, key, iv, salt);
-
-    if (strcmp(operation, "encrypt") == 0) {
-        printf("Chiffrement du fichier : %s\n", input_file);
-        int result = encryptFile(input_file, output_file, key, iv);
-        if (result != 0) {
-            printf("Erreur : Échec du chiffrement du fichier. Code d'erreur : %d\n", result);
-            return result;
-        }
-        printf("Fichier chiffré avec succès : %s\n", output_file);
-    } else if (strcmp(operation, "decrypt") == 0) {
-        printf("Déchiffrement du fichier : %s\n", input_file);
-        int result = decryptFile(input_file, output_file, key, iv);
-        if (result != 0) {
-            printf("Erreur : Échec du déchiffrement du fichier. Code d'erreur : %d\n", result);
-            return result;
-        }
-        printf("Fichier déchiffré avec succès : %s\n", output_file);
+    int result;
+    if (encrypt) {
+        result = encryptFile(input_file, output_file, key, iv, salt);
     } else {
-        printf("Opération invalide : %s. Utilisez 'encrypt' ou 'decrypt'.\n", operation);
-        return 1;
+        result = decryptFile(input_file, output_file, password, key, iv);
     }
+
+    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, result == 0 ? GTK_MESSAGE_INFO : GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, result == 0 ? "Opération réussie !" : "Erreur lors du traitement.");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 
     OPENSSL_cleanse(key, sizeof(key));
     OPENSSL_cleanse(iv, sizeof(iv));
-    return 0;
 }
 
+void filesecure(GtkWidget *widget, gpointer data) {
+    const char *title = gtk_button_get_label(GTK_BUTTON(widget));
+    int button_index = GPOINTER_TO_INT(data);
+
+    if (open_windows[button_index] != NULL) {
+        gtk_window_present(GTK_WINDOW(open_windows[button_index]));
+        return;
+    }
+
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), title);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 200);
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+    open_windows[button_index] = window;
+
+    g_signal_connect(window, "destroy", G_CALLBACK(destroyWindow), GINT_TO_POINTER(button_index));
+
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_container_add(GTK_CONTAINER(window), box);
+
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_BOX(box), grid, TRUE, TRUE, 10);
+
+    GtkWidget *space1 = gtk_label_new("");
+    gtk_grid_attach(GTK_GRID(grid), space1, 0, 1, 2, 1);
+
+    GtkWidget *radio_encrypt = gtk_radio_button_new_with_label(NULL, "Chiffrement");
+    gtk_grid_attach(GTK_GRID(grid), radio_encrypt, 0, 3, 2, 1);
+
+    GtkWidget *radio_decrypt = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio_encrypt), "Déchiffrement");
+    gtk_grid_attach(GTK_GRID(grid), radio_decrypt, 1, 3, 2, 1);
+
+    GtkWidget *space2 = gtk_label_new("");
+    gtk_grid_attach(GTK_GRID(grid), space2, 0, 4, 2, 1);
+
+    GtkWidget *label_source = gtk_label_new("Fichier source :");
+    gtk_grid_attach(GTK_GRID(grid), label_source, 0, 5, 2, 1);
+
+    GtkWidget *entry_source = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_source), "Chemin du fichier");
+    gtk_widget_set_size_request(entry_source, 300, 30);
+    gtk_grid_attach(GTK_GRID(grid), entry_source, 0, 6, 2, 1);
+
+    GtkWidget *label_dest = gtk_label_new("Fichier destination :");
+    gtk_grid_attach(GTK_GRID(grid), label_dest, 0, 7, 2, 1);
+
+    GtkWidget *entry_dest = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_dest), "Chemin du fichier");
+    gtk_widget_set_size_request(entry_dest, 300, 30);
+    gtk_grid_attach(GTK_GRID(grid), entry_dest, 0, 8, 2, 1);
+
+    GtkWidget *label_password = gtk_label_new("Mot de passe :");
+    gtk_grid_attach(GTK_GRID(grid), label_password, 0, 9, 2, 1);
+
+    GtkWidget *entry_password = gtk_entry_new();
+    gtk_entry_set_visibility(GTK_ENTRY(entry_password), FALSE);
+    gtk_widget_set_size_request(entry_password, 300, 30);
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_password), "Mot de passe");
+    gtk_grid_attach(GTK_GRID(grid), entry_password, 0, 10, 2, 1);
+
+    GtkWidget *space3 = gtk_label_new("");
+    gtk_grid_attach(GTK_GRID(grid), space3, 0, 11, 2, 1);
+
+    GtkWidget *button = gtk_button_new_with_label("Confirmer");
+    gtk_widget_set_size_request(button, 300, 30);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 12, 2, 1);
+
+    AppData *appData = g_new(AppData, 1);
+    appData->entry_source = entry_source;
+    appData->entry_dest = entry_dest;
+    appData->entry_password = entry_password;
+    appData->radio_encrypt = radio_encrypt;
+
+    g_signal_connect(button, "clicked", G_CALLBACK(buttonClick), appData);
+
+    gtk_widget_show_all(window);
+}
