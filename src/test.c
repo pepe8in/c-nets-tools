@@ -14,7 +14,7 @@
 #define TIMEOUT 1
 #define MAX_PORTS 65535
 
-extern bool verbose;
+// extern bool verbose;
 static GtkWidget *open_windows[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
 
 void destroyWindow(GtkWidget *widget, gpointer data);
@@ -33,8 +33,6 @@ void test_scanPort();
 void test_scanRange();
 void test_scanOpenPort();
 
-bool verbose = true;
-
 typedef struct {
     GtkWidget *grid;
     GtkWidget *entry;
@@ -42,12 +40,12 @@ typedef struct {
     char *ip_cleaned;
 } AppData;
 
+// bool verbose = true;
 
 void destroyWindow(GtkWidget *window, gpointer data) {
     int index = GPOINTER_TO_INT(data);
     open_windows[index] = NULL;
 }
-
 void clearContainer(GtkWidget *container) {
     GList *children = gtk_container_get_children(GTK_CONTAINER(container));
     for (GList *iter = children; iter != NULL; iter = iter->next) {
@@ -55,7 +53,6 @@ void clearContainer(GtkWidget *container) {
     }
     g_list_free(children);
 }
-
 char *cleanString(const char *str) {
     char *cleaned = g_strdup(str);
     char *p = cleaned;
@@ -69,7 +66,6 @@ char *cleanString(const char *str) {
     g_strstrip(cleaned);
     return cleaned;
 }
-
 int createSocket(const char *ip, int port) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
@@ -103,11 +99,10 @@ void scanPort(GtkWidget *button, gpointer data) {
     GtkWidget *result_label = widgets[1];
     GtkWidget *ip_entry = widgets[2];
 
-if (!GTK_IS_ENTRY(ip_entry) || !GTK_IS_ENTRY(port_entry)) {
-    gtk_label_set_text(GTK_LABEL(result_label), "Erreur : champ invalide !");
-    g_free(widgets);
-    return;
-}
+    if (!GTK_IS_ENTRY(ip_entry) || !GTK_IS_ENTRY(port_entry)) {
+        gtk_label_set_text(GTK_LABEL(result_label), "Erreur : champ invalide !");
+        return;
+    }
 
     const char *ip = gtk_entry_get_text(GTK_ENTRY(ip_entry));
     const char *port_text = gtk_entry_get_text(GTK_ENTRY(port_entry));
@@ -124,10 +119,14 @@ if (!GTK_IS_ENTRY(ip_entry) || !GTK_IS_ENTRY(port_entry)) {
     }
 
     int sock = createSocket(ip, port);
-    gtk_label_set_text(GTK_LABEL(result_label), sock < 0 ? "Port fermé" : "Port ouvert");
+    char result_message[50];
+    snprintf(result_message, sizeof(result_message), "%d : %s", port, (sock < 0 ? "Port fermé" : "Port ouvert"));
+    gtk_label_set_text(GTK_LABEL(result_label), result_message);
+
+    // gtk_label_set_text(GTK_LABEL(result_label), sock < 0 ? "Port fermé" : "Port ouvert");
     if (sock >= 0) close(sock);
 
-    g_free(widgets); // Libération mémoire
+    gtk_widget_show_all(gtk_widget_get_parent(port_entry));
 }
 void buttonClicked(GtkWidget *button, gpointer data) {
     AppData *appData = (AppData *)data;
@@ -142,7 +141,7 @@ void buttonClicked(GtkWidget *button, gpointer data) {
 
             if (g_strcmp0(label, "Scan d'un seul port") == 0) {
                 clearContainer(grid);
-        
+
                 GtkWidget *ip_label = gtk_label_new(ip);
                 gtk_grid_attach(GTK_GRID(grid), ip_label, 0, 1, 2, 1);
                 GtkWidget *ip_entry = gtk_entry_new();
@@ -150,14 +149,14 @@ void buttonClicked(GtkWidget *button, gpointer data) {
                 // gtk_grid_attach(GTK_GRID(grid), ip_entry, 0, 1, 2, 1);
 
                 GtkWidget *port_label = gtk_label_new("Entrez un port à scanner :");
-                gtk_grid_attach(GTK_GRID(grid), port_label, 0, 2, 2, 1);
+                gtk_grid_attach(GTK_GRID(grid), port_label, 0, 2, 1, 1);
 
                 GtkWidget *port_entry = gtk_entry_new();
                 gtk_entry_set_placeholder_text(GTK_ENTRY(port_entry), "Ex: 80");
-                gtk_grid_attach(GTK_GRID(grid), port_entry, 0, 3, 2, 1);
+                gtk_grid_attach(GTK_GRID(grid), port_entry, 0, 3, 1, 1);
 
                 GtkWidget *scan_button = gtk_button_new_with_label("Scanner");
-                gtk_grid_attach(GTK_GRID(grid), scan_button, 0, 4, 2, 1);
+                gtk_grid_attach(GTK_GRID(grid), scan_button, 0, 4, 1, 1);
 
                 GtkWidget *result_label = gtk_label_new("");
                 gtk_grid_attach(GTK_GRID(grid), result_label, 0, 5, 2, 1);
@@ -169,13 +168,51 @@ void buttonClicked(GtkWidget *button, gpointer data) {
                 g_signal_connect(scan_button, "clicked", G_CALLBACK(scanPort), data_array);
 
                 gtk_widget_show_all(grid);
+            } else if (g_strcmp0(label, "Scan d'une plage de ports") == 0) {
+                clearContainer(grid);
+
+                GtkWidget *ip_label = gtk_label_new(ip);
+                gtk_grid_attach(GTK_GRID(grid), ip_label, 0, 1, 2, 1);
+                GtkWidget *ip_entry = gtk_entry_new();
+                gtk_entry_set_text(GTK_ENTRY(ip_entry), ip); // Préremplir l'IP
+                // gtk_grid_attach(GTK_GRID(grid), ip_entry, 0, 1, 2, 1);
+
+                GtkWidget *port_label = gtk_label_new("Entrez une plage de port à scanner :");
+                gtk_grid_attach(GTK_GRID(grid), port_label, 0, 2, 2, 1);
+
+                GtkWidget *start_port_entry = gtk_entry_new();
+                gtk_entry_set_placeholder_text(GTK_ENTRY(start_port_entry), "Ex: 10");
+                gtk_grid_attach(GTK_GRID(grid), start_port_entry, 0, 3, 1, 1);
+
+                GtkWidget *end_port_entry = gtk_entry_new();
+                gtk_entry_set_placeholder_text(GTK_ENTRY(end_port_entry), "Ex: 100");
+                gtk_grid_attach(GTK_GRID(grid), end_port_entry, 1, 3, 1, 1);
+
+                GtkWidget *scan_button = gtk_button_new_with_label("Scanner");
+                gtk_grid_attach(GTK_GRID(grid), scan_button, 0, 4, 2, 1);
+
+                GtkWidget *result_label = gtk_label_new("");
+                gtk_grid_attach(GTK_GRID(grid), result_label, 0, 5, 2, 1);
+
+                GtkWidget **data_array = g_malloc(sizeof(GtkWidget *) * 4);
+                data_array[0] = start_port_entry;
+                data_array[1] = end_port_entry;
+                data_array[2] = result_label;
+                data_array[3] = ip_entry; 
+                g_signal_connect(scan_button, "clicked", G_CALLBACK(scanPort), data_array);
+
+                gtk_widget_show_all(grid);
+            } else if (g_strcmp0(label, "Scan de tous les ports") == 0) {
+            } else if (g_strcmp0(label, "Scan des ports well-known") == 0) {
+            } else if (g_strcmp0(label, "Scan des ports registered") == 0) {
+            } else if (g_strcmp0(label, "Scan des ports dynamic/private") == 0) {
+            } else if (g_strcmp0(label, "Afficher les ports ouverts d'une plage") == 0) {
             }
             break;
         }
     }
     g_list_free(children);
 }
-
 void checkIp(GtkWidget *button, gpointer data) {
     GtkWidget *entry = GTK_WIDGET(data);
     const char *ip = gtk_entry_get_text(GTK_ENTRY(entry));
@@ -206,7 +243,6 @@ void checkIp(GtkWidget *button, gpointer data) {
         gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
         gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
         gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
-
         gtk_grid_attach(GTK_GRID(box), grid, 0, 0, 1, 1);
 
         GtkWidget *ip_label = gtk_label_new(ip_cleaned);
@@ -236,14 +272,20 @@ void checkIp(GtkWidget *button, gpointer data) {
                 radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(prev_radio), options[i]);
             }
             prev_radio = radio;
-            radio_buttons[i] = radio;  
-            gtk_grid_attach(GTK_GRID(grid), radio, i % 2, 3 + (i / 2), 1, 1);
+            radio_buttons[i] = radio;
+            if (i == 6) {
+                gtk_widget_set_halign(radio, GTK_ALIGN_CENTER);  
+                gtk_grid_attach(GTK_GRID(grid), radio, 0, 3 + (i / 2), 2, 1);  
+            } else {
+                gtk_grid_attach(GTK_GRID(grid), radio, i % 2, 3 + (i / 2), 1, 1);
+            }
         }
-        
+
         GtkWidget *space2 = gtk_label_new("");
         gtk_grid_attach(GTK_GRID(grid), space2, 0, 7, 2, 1);
 
         GtkWidget *confirm_button = gtk_button_new_with_label("Confirmer");
+        gtk_widget_set_size_request(confirm_button, 300, 30);
         gtk_widget_set_halign(confirm_button, GTK_ALIGN_CENTER);
         gtk_grid_attach(GTK_GRID(grid), confirm_button, 0, 8, 2, 1);
 
@@ -259,7 +301,6 @@ void checkIp(GtkWidget *button, gpointer data) {
     }
     regfree(&regex);
 }
-
 void porteye(GtkWidget *porteye, gpointer data) {
     const char *title = gtk_button_get_label(GTK_BUTTON(porteye));
     int button_index = GPOINTER_TO_INT(data);
@@ -287,7 +328,7 @@ void porteye(GtkWidget *porteye, gpointer data) {
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
     gtk_box_pack_start(GTK_BOX(box), grid, TRUE, TRUE, 10);
     
-    GtkWidget *label = gtk_label_new("Entrez une adresse IP à scanner :");
+    GtkWidget *label = gtk_label_new("Entrez une adresse IPv4 à scanner :");
     gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 2, 1);
 
     GtkWidget *space1 = gtk_label_new("");
@@ -296,19 +337,20 @@ void porteye(GtkWidget *porteye, gpointer data) {
     GtkWidget *entry = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "Ex: 192.168.1.1");
     gtk_entry_set_max_length(GTK_ENTRY(entry), 14);
+    gtk_widget_set_size_request(entry, 300, 30);
     gtk_grid_attach(GTK_GRID(grid), entry, 0, 3, 2, 1);
     
-    GtkWidget *space2 = gtk_label_new("");
-    gtk_grid_attach(GTK_GRID(grid), space2, 0, 4, 2, 1); 
+    //GtkWidget *space2 = gtk_label_new("");
+    //gtk_grid_attach(GTK_GRID(grid), space2, 0, 4, 2, 1); 
 
     GtkWidget *button = gtk_button_new_with_label("Entrer");
+    gtk_widget_set_size_request(button, 300, 30);
     g_signal_connect(button, "clicked", G_CALLBACK(checkIp), entry);
     g_signal_connect(entry, "activate", G_CALLBACK(checkIp), entry);
-    gtk_grid_attach(GTK_GRID(grid), button, 0, 5, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 4, 2, 1);
     
     gtk_widget_show_all(window);
 }
-
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
@@ -364,4 +406,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
