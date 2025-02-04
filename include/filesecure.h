@@ -1,5 +1,5 @@
-#ifndef FILE_SECURE_H
-#define FILE_SECURE_H
+#ifndef FILESECURE_H
+#define FILESECURE_H
 
 #include <stddef.h>
 #include <stdio.h>
@@ -22,7 +22,7 @@ typedef struct {
     GtkWidget *entry_dest;
     GtkWidget *entry_password;
     GtkWidget *radio_encrypt;
-} AppData;
+} FileSecure;
 
 void deriveKeyAndIV(const char *password, unsigned char *key, unsigned char *iv, unsigned char *salt, int generate);
 int encryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv, const unsigned char *salt);
