@@ -1,8 +1,7 @@
 CC = gcc
 CFLAGS = `pkg-config --cflags --libs gtk+-3.0`
-SRC = src/test.c
-#SRC = src/main.c src/porteye.c
-OUT = exe/test2
+SRC = src/main.c src/porteye.c
+OUT = exe/c-nets-tools
 
 $(OUT): $(SRC)
 	$(CC) -o $(OUT) $(SRC) $(CFLAGS)

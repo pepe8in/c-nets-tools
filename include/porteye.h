@@ -17,21 +17,37 @@
 #define TIMEOUT 1
 #define MAX_PORTS 65535
 
-extern bool verbose;
+// extern bool verbose;
 static GtkWidget *open_windows[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
+
+typedef struct {
+    GtkWidget *grid;
+    GtkWidget *entry;
+    GtkWidget *window;
+    char *ip_cleaned;
+} AppData;
+
+typedef struct {
+    char ip[64];
+    int start_port;
+    int end_port;
+    GtkWidget *result_textview;
+} ScanData;
 
 void destroyWindow(GtkWidget *widget, gpointer data);
 void clearContainer(GtkWidget *widget);
+char *cleanString(const char *str);
+int createSocket(const char *ip, int port);
+void scanPort(GtkWidget *widget, gpointer data);
+void scanPortRange(GtkWidget *widget, gpointer data);
+void scanPortOpenRange(GtkWidget *widget, gpointer data);
+void *scanPortRangeThread(void *arg);
+void *scanPortOpenRangeThread(void *arg);
+gboolean updateTextView(gpointer data);
 void buttonClicked(GtkWidget *widget, gpointer data);
 void checkIp(GtkWidget *widget, gpointer data);
 void porteye(GtkWidget *widget, gpointer data);
 
-void scanPort(GtkWidget *widget, gpointer data);
-int createSocket(const char *ip, int port); 
-
-int checkPort(const char *ip, int port);
-int scanRange(const char *ip, int start_port, int end_port);
-int scanOpenPort(const char *ip, int start_port, int end_port);
 void test_checkIp();
 void test_checkPort();
 void test_scanPort();
