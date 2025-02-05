@@ -42,7 +42,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 - Compilateur : GCC
 - Librairies : `libgtk-3-dev` `libxml2-dev` `libssl-dev` `libcap-dev` `libsqlite3-dev` `pkg-config`
 
-    ```c
+    ```sh
     #Cloner le dépôt
     git clone https://github.com/pepe8in/c-nets-tools
     cd c-nets-tools
