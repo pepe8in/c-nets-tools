@@ -37,6 +37,25 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     - Générer un script SQL pour créer les tables et les relations.
     - Exécuter le script SQL sur une base de données MySQL pour la créer. 
 
+## Prérequis, dépendances, installation, exécution 
+- Système : Linux
+- Compilateur : GCC
+- Librairies : `libgtk-3-dev` `libxml2-dev` `libssl-dev` `libcap-dev` `libsqlite3-dev` `pkg-config`
+
+    ```c
+    #Cloner le dépôt
+    git clone https://github.com/pepe8in/c-nets-tools
+    cd c-nets-tools
+
+    #Compilation
+    make
+
+    #Exécution de l'interface principale
+    ./c-nets-tools
+    ```
+
+
+
 ## Estimation de production 
 
 |         Tache                            | Estimation de temps  |   Responsable   |      Délais      |
@@ -85,7 +104,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     │   └── test_xmlbuilder.c
     │
     ├── /exe
-    │   ├── main
+    │   ├── c-nets-tools
     │   ├── porteye
     │   ├── packetsnoop
     │   ├── filesecure
@@ -200,45 +219,57 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
 7. Merge dans la branche main
 
 ## PortEye
-
 ### Fonctions principales :
 1. **Scan d'un seul port**
-Permet de scanner un seul port sur l'adresse IP spécifiée. Le programme vérifie si le port est ouvert ou fermé.
 2. **Scan d'une plage de ports**
-Permet de scanner une plage de ports, en vérifiant chaque port dans la plage spécifiée.
 3. **Scan de tous les ports (0 à 65535)**
-Permet de scanner tous les ports possibles (de 0 à 65535). Il peut prendre un certain temps en fonction de la vitesse de votre réseau et du nombre de ports à tester.
 4. **Scan des ports well-known (0 à 1023)**
-Permet de scanner les ports "bien connus", c'est-à-dire les ports compris entre 0 et 1023, qui sont souvent utilisés par des services standards comme HTTP (port 80), HTTPS (port 443), FTP (port 21), etc.
 5. **Scan des ports registered (1024 à 49151)**
-Permet de scanner les ports enregistrés, qui sont utilisés par des applications et des services enregistrés auprès de l'IANA.
 6. **Scan des ports dynamic/private (49152 à 65535)**
-Permet de scanner les ports dits "dynamiques" ou "privés", utilisés par des applications pour des connexions temporaires.
 7. **Afficher les ports ouverts dans une plage**
-Permet de scanner une plage de ports et d'afficher uniquement les ports qui sont ouverts.
+### Amélioration : 
+- Refacto code
+- Ajout de test
+- Bouton de retour au choix des options 
+- Performance
 
 ## PacketSnoop
-## FileSecure
+### Fonctions principales :
+1. **Capture des paquets de notre machine en temps réel**  
+### Amélioration : 
+- Refacto code
+- Ajout de test
+- Problèmes dans la recupérations des données
+- Filtrage
+- Export des resultats 
 
+## FileSecure
 ### Fonctions principales :
 1. **Chiffrement de fichiers**  
-  FileSecure permet de sécuriser n'importe quel fichier en appliquant un chiffrement robuste basé sur l'algorithme **AES-256**.  
-  Le chiffrement garantit que seules les personnes disposant de la clé appropriée peuvent accéder aux données.  
-  Cette fonctionnalité est essentielle pour protéger les fichiers sensibles contre l'accès non autorisé.  
 2. **Déchiffrement de fichiers**  
-  Les fichiers chiffrés avec FileSecure peuvent être restaurés dans leur état d'origine en utilisant la même clé et le même vecteur d'initialisation (IV).  
-  Le processus de déchiffrement garantit une récupération fidèle des données, sans perte d'information.  
-  Cette fonctionnalité est particulièrement utile pour le stockage sécurisé et la transmission de fichiers confidentiels.  
-3. **Compatibilité avec différents formats**  
-  FileSecure prend en charge le chiffrement et le déchiffrement de **fichiers texte et binaires**, ce qui permet de protéger aussi bien des documents que des fichiers multimédias, des archives ou des exécutables.  
-4. **Modes de chiffrement configurables**  
-  Le programme peut être adapté pour utiliser différents **modes de chiffrement AES**, tels que **ECB (Electronic Codebook)** et **CBC (Cipher Block Chaining)**.  
-  Le mode **CBC** est recommandé pour une meilleure sécurité, car il introduit un vecteur d'initialisation (IV) qui empêche l'analyse des blocs répétitifs dans les fichiers.  
+### Amélioration : 
+- Ajout de test 
 
 ## DDoSWatcher
-## URLSpy
+### Fonctions principales :
+**Liste des interfaces réseau disponibles**
+**Filtrage du trafic par port spécifique**
+**Détection d'activités suspectes basée sur un seuil de paquets**
+**Blocage automatique des IP suspectes via iptables**
+**Alertes et notifications en cas de trafic anormal**
+### Amélioration : 
+- Ajout de test 
+- données en temps réel du nombre de paquets
+
 ## XMLBuilder
-## Interface utilisateur
+### Fonctions principales :
+**Lis un fichier XML en génère un fichier SQL puis l'exécute**
+### Amélioration : 
+- Refacto code 
+- Ajout de test 
+- Erreur sur multi balise dans une balise parentes
+
+## URLSpy
 
 ## Crédit
 @pepe8in

@@ -4,17 +4,23 @@
 void deriveKeyAndIV(const char *password, unsigned char *key, unsigned char *iv, unsigned char *salt, int generate) {
     if (generate) {
         if (!RAND_bytes(salt, 8)) {
-            fprintf(stderr, "Erreur : Impossible de générer un sel aléatoire\n");
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible de générer un sel aléatoire.");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
             exit(1);
         }
     }
     if (!PKCS5_PBKDF2_HMAC(password, strlen(password), salt, 8, 10000, EVP_sha256(), 32, key)) {
-        fprintf(stderr, "Erreur : Échec de la dérivation de la clé\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de la dérivation de la clé.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         exit(1);
     }
     if (generate) {
         if (!RAND_bytes(iv, 16)) {
-            fprintf(stderr, "Erreur : Échec de la génération d'un IV aléatoire\n");
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de la génération d'un IV aléatoire.");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
             exit(1);
         }
     }
@@ -23,27 +29,35 @@ void deriveKeyAndIV(const char *password, unsigned char *key, unsigned char *iv,
 int encryptFile(const char *input_file, const char *output_file, const unsigned char *key, const unsigned char *iv, const unsigned char *salt) {
     FILE *input = fopen(input_file, "rb");
     if (input == NULL) {
-        perror("Erreur : Impossible d'ouvrir le fichier d'entrée");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible d'ouvrir le fichier d'entrée.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return ERR_FILE_OPEN;
     }
 
     FILE *output = fopen(output_file, "wb");
     if (output == NULL) {
-        perror("Erreur : Impossible d'ouvrir le fichier de sortie");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible d'ouvrir le fichier de sortie.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         fclose(input);
         return ERR_FILE_OPEN;
     }
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        fprintf(stderr, "Erreur : Impossible de créer le contexte EVP\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible de créer le contexte EVP.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         fclose(input);
         fclose(output);
         return ERR_AES_KEY;
     }
 
     if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
-        fprintf(stderr, "Erreur : Échec de l'initialisation du chiffrement\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de l'initialisation du chiffrement.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);
@@ -59,7 +73,9 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
 
     while ((len = fread(buffer_in, 1, DECRYPT_BUFFER_SIZE, input)) > 0) {
         if (EVP_EncryptUpdate(ctx, buffer_out, &cipher_len, buffer_in, len) != 1) {
-            fprintf(stderr, "Erreur : Échec du chiffrement\n");
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec du chiffrement.");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
             EVP_CIPHER_CTX_free(ctx);
             fclose(input);
             fclose(output);
@@ -69,7 +85,9 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
     }
 
     if (EVP_EncryptFinal_ex(ctx, buffer_out, &cipher_len) != 1) {
-        fprintf(stderr, "Erreur : Échec de la finalisation du chiffrement\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de la finalisation du chiffrement.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);
@@ -85,20 +103,26 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
 int decryptFile(const char *input_file, const char *output_file, const char *password, unsigned char *key, unsigned char *iv) {
     FILE *input = fopen(input_file, "rb");
     if (input == NULL) {
-        perror("Erreur : Impossible d'ouvrir le fichier d'entrée");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible d'ouvrir le fichier d'entrée.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return ERR_FILE_OPEN;
     }
 
     FILE *output = fopen(output_file, "wb");
     if (output == NULL) {
-        perror("Erreur : Impossible d'ouvrir le fichier de sortie");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible d'ouvrir le fichier de sortie.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         fclose(input);
         return ERR_FILE_OPEN;
     }
 
     EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
     if (!ctx) {
-        fprintf(stderr, "Erreur : Impossible de créer le contexte EVP\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible de créer le contexte EVP.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         fclose(input);
         fclose(output);
         return ERR_AES_KEY;
@@ -107,7 +131,9 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
     unsigned char salt[8];
 
     if (fread(salt, 1, 8, input) != 8) {
-        fprintf(stderr, "Erreur : Impossible de lire le sel\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible de lire le sel.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);
@@ -115,7 +141,9 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
     }
 
     if (fread(iv, 1, 16, input) != 16) {
-        fprintf(stderr, "Erreur : Impossible de lire l'IV\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Impossible de lire l'IV.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);
@@ -125,7 +153,9 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
     deriveKeyAndIV(password, key, iv, salt, 0);
 
     if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1) {
-        fprintf(stderr, "Erreur : Échec de l'initialisation du déchiffrement\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de l'initialisation du déchiffrement.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);
@@ -138,8 +168,9 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
 
     while ((len = fread(buffer_in, 1, DECRYPT_BUFFER_SIZE, input)) > 0) {
         if (EVP_DecryptUpdate(ctx, buffer_out, &plain_len, buffer_in, len) != 1) {
-            ERR_print_errors_fp(stderr);
-            fprintf(stderr, "Erreur : Échec du déchiffrement\n");
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec du déchiffrement.");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
             EVP_CIPHER_CTX_free(ctx);
             fclose(input);
             fclose(output);
@@ -149,8 +180,9 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
     }
 
     if (EVP_DecryptFinal_ex(ctx, buffer_out, &plain_len) != 1) {
-        ERR_print_errors_fp(stderr);  // Affiche les erreurs OpenSSL
-        fprintf(stderr, "Erreur : Échec de la finalisation du déchiffrement\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : Échec de la finalisation du déchiffrement.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         EVP_CIPHER_CTX_free(ctx);
         fclose(input);
         fclose(output);

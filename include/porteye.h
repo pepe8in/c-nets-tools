@@ -11,8 +11,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <regex.h>
-#include <glib.h>
 #include <gtk/gtk.h>
+#include <glib.h>
 #include "interface.h"
 
 #define TIMEOUT 1

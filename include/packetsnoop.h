@@ -1,3 +1,6 @@
+#ifndef PACKETSNOOP_H
+#define PACKETSNOOP_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,9 +16,9 @@
 #include <netinet/ip_icmp.h>
 #include <net/if.h>
 #include <linux/ipv6.h>
+#include <pthread.h>
 #include <gtk/gtk.h>
 #include <glib.h>
-#include <pthread.h>
 #include "interface.h"
 
 #define BUFFER_SIZE 65536
@@ -42,3 +45,4 @@ void *capture_packets(void *arg);
 void packetsnoop_confirm(GtkWidget *button, gpointer data);
 void packetsnoop(GtkWidget *widget, gpointer data);
 
+#endif

@@ -5,8 +5,10 @@ void listInterfaces(GtkComboBox *combo_box) {
     pcap_if_t *alldevs, *dev;
     char errbuf[PCAP_ERRBUF_SIZE];
 
-    if (pcap_findalldevs(&alldevs, errbuf) == -1) {
-        fprintf(stderr, "Erreur lors de la récupération des interfaces : %s\n", errbuf);
+    if (pcap_findalldevs(&alldevs, errbuf) == -1) {    
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur lors de la récupération des interfaces : %s", errbuf);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return;
     }
 

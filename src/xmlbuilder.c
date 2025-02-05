@@ -79,13 +79,17 @@ int executeSqlFile(const char *db_name, const char *sql_file) {
     long length;
 
     if (sqlite3_open(db_name, &db) != SQLITE_OK) {
-        fprintf(stderr, "Error: Could not open database: %s\n", sqlite3_errmsg(db));
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Impossible d'ouvrir la base de données : %s", sqlite3_errmsg(db));
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return 1;
     }
 
     file = fopen(sql_file, "r");
     if (!file) {
-        fprintf(stderr, "Error: Could not open SQL file: %s\n", sql_file);
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Impossible d'ouvrir le fichier SQL : %s", sql_file);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         sqlite3_close(db);
         return 1;
     }
@@ -96,7 +100,9 @@ int executeSqlFile(const char *db_name, const char *sql_file) {
 
     sql = malloc(length + 1);
     if (sql == NULL) {
-        fprintf(stderr, "Error: Memory allocation failed\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Erreur : l'allocation de mémoire a échoué.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         fclose(file);
         sqlite3_close(db);
         return 1;
@@ -107,7 +113,9 @@ int executeSqlFile(const char *db_name, const char *sql_file) {
     fclose(file);
 
     if (sqlite3_exec(db, sql, 0, 0, &err_msg) != SQLITE_OK) {
-        fprintf(stderr, "Error: SQL execution failed: %s\n", err_msg);
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Execution SQL échoué : %s", err_msg);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         sqlite3_free(err_msg);
         free(sql);
         sqlite3_close(db);
@@ -117,7 +125,9 @@ int executeSqlFile(const char *db_name, const char *sql_file) {
     free(sql);
     sqlite3_close(db);
 
-    printf("SQL file executed successfully!\n");
+    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Execution du fichier SQL avec succés.");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
     return 0;
 }
 
@@ -315,7 +325,9 @@ void generateSql(xmlNodePtr root) {
 
     FILE *output_file = fopen("output.sql", "w");
     if (output_file == NULL) {
-        fprintf(stderr, "Error: Couldn't open output.sql for writing\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Erreur: Impossible d'ouvrir output.sql pour l'écrire.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return;
     }
 
@@ -358,19 +370,25 @@ void generateSql(xmlNodePtr root) {
 
 void parseXml(const char *filename) {
     xmlDocPtr doc = xmlReadFile(filename, NULL, 0);
-    if (doc == NULL) {
-        fprintf(stderr, "Error: Couldn't read the file %s\n", filename);
+    if (doc == NULL) {        
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Impossible de lire le fichier : %s\n", filename);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         return;
     }
 
     xmlNodePtr root = xmlDocGetRootElement(doc);
     if (root == NULL) {
-        fprintf(stderr, "Error: The XML is empty\n");
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Erreur: Le XML est vide.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
         xmlFreeDoc(doc);
         return;
     }
-
-    printf("Root element: %s\n", root->name);
+    
+    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Root element: %s\n", root->name);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
     generateSql(root);
 
     xmlFreeDoc(doc);

@@ -106,11 +106,6 @@ void scanPortRange(GtkWidget *button, gpointer data) {
     result_textview = widgets[2];
     ip_entry = widgets[3];
 
-    if (!GTK_IS_TEXT_VIEW(result_textview) || !GTK_IS_ENTRY(ip_entry)) {
-        g_print("Erreur: Widgets invalides.\n");
-        return;
-    }
-
     const char *ip = gtk_entry_get_text(GTK_ENTRY(ip_entry));
 
     if (start_port < 0 || start_port > MAX_PORTS || end_port < 0 || end_port > MAX_PORTS) {
@@ -125,10 +120,6 @@ void scanPortRange(GtkWidget *button, gpointer data) {
         end_port = temp;
     }
     ScanData *scan_data = g_malloc(sizeof(ScanData));
-    if (!scan_data) {
-        g_print("Erreur d'allocation mémoire ScanData.\n");
-        return;
-    }
 
     strncpy(scan_data->ip, ip, sizeof(scan_data->ip) - 1);
     scan_data->ip[sizeof(scan_data->ip) - 1] = '\0'; 
@@ -156,11 +147,6 @@ void scanPortOpenRange(GtkWidget *button, gpointer data) {
     start_port = atoi(start_str);
     end_port = atoi(end_str);
 
-    if (!GTK_IS_TEXT_VIEW(result_textview) || !GTK_IS_ENTRY(ip_entry)) {
-        g_print("Erreur: Widgets invalides.\n");
-        return;
-    }
-
     const char *ip = gtk_entry_get_text(GTK_ENTRY(ip_entry));
     
     if (start_port < 0 || start_port > MAX_PORTS || end_port < 0 || end_port > MAX_PORTS) {
@@ -176,10 +162,6 @@ void scanPortOpenRange(GtkWidget *button, gpointer data) {
     }
 
     ScanData *scan_data = g_malloc(sizeof(ScanData));
-    if (!scan_data) {
-        g_print("Erreur d'allocation mémoire ScanData.\n");
-        return;
-    }
 
     strncpy(scan_data->ip, ip, sizeof(scan_data->ip) - 1);
     scan_data->ip[sizeof(scan_data->ip) - 1] = '\0';

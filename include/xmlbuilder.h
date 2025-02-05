@@ -3,9 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <string.h>
 #include <sqlite3.h>
 #include <gtk/gtk.h>
 #include "interface.h"
