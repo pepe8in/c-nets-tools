@@ -1,4 +1,5 @@
 #include "../include/porteye.h"
+#include "../include/packetsnoop.h"
 #include "../include/filesecure.h"
 #include "../include/ddoswatcher.h"
 #include "../include/xmlbuilder.h"
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
                 g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
                 break;
             case 1 :
-                g_signal_connect(button, "clicked", G_CALLBACK(porteye), GINT_TO_POINTER(i));
+                g_signal_connect(button, "clicked", G_CALLBACK(packetsnoop), GINT_TO_POINTER(i));
                 break;
             case 2 :
                 g_signal_connect(button, "clicked", G_CALLBACK(filesecure), GINT_TO_POINTER(i));

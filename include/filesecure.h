@@ -15,7 +15,7 @@
 #define ERR_FILE_OPEN -1
 #define ERR_AES_KEY -2
 #define AES_KEY_SIZE 256
-#define BUFFER_SIZE 1024
+#define DECRYPT_BUFFER_SIZE 1024
 
 typedef struct {
     GtkWidget *entry_source;

@@ -13,44 +13,32 @@
 #include <netinet/ip_icmp.h>
 #include <net/if.h>
 #include <linux/ipv6.h>
+#include <gtk/gtk.h>
+#include <glib.h>
+#include <pthread.h>
+#include "interface.h"
 
 #define BUFFER_SIZE 65536
 
-/**
- * @brief Traite un paquet réseau capturé et identifie son type.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- */
-void process(unsigned char* buffer, int size);
-/**
- * @brief Analyse et affiche les informations liées au protocole Ethernet.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- */
-void etherType(unsigned char* buffer, int size);
-/**
- * @brief Analyse et affiche les informations d'un paquet ICMP.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- */
-void icmpPacket(unsigned char* buffer, int size);
-/**
- * @brief Analyse et affiche les informations d'un paquet TCP.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- */
-void tcpPacket(unsigned char* buffer, int size);
-/**
- * @brief Analyse et affiche les informations d'un paquet UDP.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- */
-void udpPacket(unsigned char* buffer, int size);
-/**
- * @brief Analyse et affiche les données utiles d'un paquet HTTP ou HTTPS.
- * @param buffer Pointeur vers les données du paquet.
- * @param size Taille du paquet en octets.
- * @param s Indique le port (80 pour HTTP, 443 pour HTTPS).
- */
-void httpPacket(unsigned char* buffer, int size, int s);
+typedef struct {
+    GtkWidget *widget;
+    gboolean stop;
+    GThread *thread;
+} PacketSnoopData;
+
+typedef struct {
+    unsigned char *buffer;
+    GtkWidget *widget;
+} EtherTypeData;
+
+void httpPacket(unsigned char* buffer, int size, int s, GtkWidget *widget);
+void icmpPacket(unsigned char* buffer, int size, GtkWidget *widget);
+void tcpPacket(unsigned char* buffer, int size, GtkWidget *widget);
+void udpPacket(unsigned char* buffer, int size, GtkWidget *widget);
+void etherType(unsigned char* buffer, int size, GtkWidget *widget);
+void process(unsigned char* buffer, int size, GtkWidget *widget);
+gboolean etherType_idle(gpointer data);
+void *capture_packets(void *arg);
+void packetsnoop_confirm(GtkWidget *button, gpointer data);
+void packetsnoop(GtkWidget *widget, gpointer data);
 

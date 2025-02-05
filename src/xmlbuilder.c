@@ -380,10 +380,12 @@ void parseXml(const char *filename) {
 void xmlbuilder_confirm(GtkButton *button, gpointer user_data) {
     GtkWidget *entry_file = GTK_WIDGET(user_data);
 
-    char *file_path = gtk_entry_get_text(GTK_ENTRY(entry_file));
+    const char *file_path = gtk_entry_get_text(GTK_ENTRY(entry_file));
 
     if (strstr(file_path, ".xml") != NULL) {
-        xml_file_path = file_path;
+        //xml_file_path = file_path;
+        g_free(xml_file_path);
+        xml_file_path = g_strdup(file_path);
 
         parseXml(xml_file_path);
 

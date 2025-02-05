@@ -53,11 +53,11 @@ int encryptFile(const char *input_file, const char *output_file, const unsigned 
     fwrite(salt, 1, 8, output);
     fwrite(iv, 1, 16, output);
 
-    unsigned char buffer_in[BUFFER_SIZE];
-    unsigned char buffer_out[BUFFER_SIZE + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
+    unsigned char buffer_in[DECRYPT_BUFFER_SIZE];
+    unsigned char buffer_out[DECRYPT_BUFFER_SIZE + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
     int len, cipher_len;
 
-    while ((len = fread(buffer_in, 1, BUFFER_SIZE, input)) > 0) {
+    while ((len = fread(buffer_in, 1, DECRYPT_BUFFER_SIZE, input)) > 0) {
         if (EVP_EncryptUpdate(ctx, buffer_out, &cipher_len, buffer_in, len) != 1) {
             fprintf(stderr, "Erreur : Échec du chiffrement\n");
             EVP_CIPHER_CTX_free(ctx);
@@ -132,11 +132,11 @@ int decryptFile(const char *input_file, const char *output_file, const char *pas
         return ERR_AES_KEY;
     }
 
-    unsigned char buffer_in[BUFFER_SIZE];
-    unsigned char buffer_out[BUFFER_SIZE + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
+    unsigned char buffer_in[DECRYPT_BUFFER_SIZE];
+    unsigned char buffer_out[DECRYPT_BUFFER_SIZE + EVP_CIPHER_block_size(EVP_aes_256_cbc())];
     int len, plain_len;
 
-    while ((len = fread(buffer_in, 1, BUFFER_SIZE, input)) > 0) {
+    while ((len = fread(buffer_in, 1, DECRYPT_BUFFER_SIZE, input)) > 0) {
         if (EVP_DecryptUpdate(ctx, buffer_out, &plain_len, buffer_in, len) != 1) {
             ERR_print_errors_fp(stderr);
             fprintf(stderr, "Erreur : Échec du déchiffrement\n");
