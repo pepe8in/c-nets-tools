@@ -1,43 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <string.h>
-#include <sqlite3.h>
+#include "../include/xmlbuilder.h"
 
-#define MAX_TABLE_NAME 256
-#define MAX_TABLES 100
-#define MAX_RELATIONS 100
-
-/*
- * @brief Structure pour stocker les relations entre deux tables.
- */
-typedef struct {
-    char table_1[256];
-    char table_2[256];
-    char attributes[10][256];
-    int attr_count;
-} RelationAttributes;
-
-/*
- * @brief Structure pour gérer les compteurs d'ID par table.
- */
-typedef struct {
-    char table_name[256];
-    int current_id;
-} TableID;
 
 RelationAttributes relation_attributes[MAX_RELATIONS];
-int relation_count = 0;
-
 TableID id_counters[MAX_TABLES];
+char *xml_file_path = NULL;
+int relation_count = 0;
 int id_counter_count = 0;
 
-/*
- * @brief Vérifie si une chaîne ne contient que des espaces blancs.
- * @param str Chaîne à vérifier.
- * @return int Renvoie 1 si la chaîne ne contient que des espaces blancs, sinon 0.
- */
 int isWhitespaceOnly(const char *str) {
     while (*str) {
         if (*str != ' ' && *str != '\n' && *str != '\t' && *str != '\r') {
@@ -48,53 +17,6 @@ int isWhitespaceOnly(const char *str) {
     return 1;
 }
 
-/*
- * @brief Nettoie une chaîne en remplaçant les retours à la ligne, tabulations et espaces multiples par un seul espace.
- * @param str Chaîne à nettoyer.
- */
-void cleanString(char *str) {
-    char *src = str, *dst = str;
-    int in_space = 0;
-
-    while (*src) {
-        if (*src == '\n' || *src == '\r' || *src == '\t') {
-            *src = ' ';
-        }
-        if (*src == ' ') {
-            if (in_space) {
-                src++;
-                continue;
-            }
-            in_space = 1;
-        } else {
-            in_space = 0;
-        }
-        *dst++ = *src++;
-    }
-    *dst = '\0';
-
-    char *start = str;
-    while (*start == ' ') {
-        start++;
-    }
-
-    char *end = dst - 1;
-    while (end > start && *end == ' ') {
-        end--;
-    }
-    *(end + 1) = '\0';
-
-    if (start != str) {
-        memmove(str, start, end - start + 2);
-    }
-}
-
-/*
- * @brief Échappe une chaîne pour une insertion sécurisée dans une requête SQL.
- * @param input Chaîne d'entrée.
- * @param output Buffer de sortie.
- * @param max_size Taille maximale du buffer de sortie.
- */
 void escapeSqlString(const char *input, char *output, size_t max_size) {
     size_t j = 0;
     for (size_t i = 0; input[i] != '\0' && j < max_size - 1; i++) {
@@ -110,11 +32,6 @@ void escapeSqlString(const char *input, char *output, size_t max_size) {
     output[j] = '\0';
 }
 
-/*
- * @brief Récupère un nouvel identifiant pour une table donnée.
- * @param table_name Nom de la table.
- * @return int Nouvel identifiant.
- */
 int getNewId(const char *table_name) {
     for (int i = 0; i < id_counter_count; i++) {
         if (strcmp(id_counters[i].table_name, table_name) == 0) {
@@ -127,13 +44,6 @@ int getNewId(const char *table_name) {
     return id_counters[id_counter_count++].current_id;
 }
 
-/*
- * @brief Vérifie si une table existe déjà dans la liste.
- * @param table_name Nom de la table.
- * @param tables Liste des tables.
- * @param table_count Nombre de tables dans la liste.
- * @return int Renvoie 1 si la table existe, sinon 0.
- */
 int tableExists(const char *table_name, char tables[MAX_TABLES][MAX_TABLE_NAME], int table_count) {
     for (int i = 0; i < table_count; i++) {
         if (strcmp(tables[i], table_name) == 0) {
@@ -143,11 +53,6 @@ int tableExists(const char *table_name, char tables[MAX_TABLES][MAX_TABLE_NAME],
     return 0;
 }
 
-/*
- * @brief Détermine si un nœud XML représente une clé étrangère (contient des éléments enfants).
- * @param node Nœud XML.
- * @return int Renvoie 1 si c'est une clé étrangère, sinon 0.
- */
 int isForeignKey(xmlNodePtr node) {
     for (xmlNodePtr child = node->children; child != NULL; child = child->next) {
         if (child->type == XML_ELEMENT_NODE) {
@@ -157,11 +62,6 @@ int isForeignKey(xmlNodePtr node) {
     return 0;
 }
 
-/*
- * @brief Vérifie si un nœud XML possède des éléments enfants.
- * @param node Nœud XML.
- * @return int Renvoie 1 s'il existe au moins un enfant de type élément, sinon 0.
- */
 int hasChildElements(xmlNodePtr node) {
     for (xmlNodePtr child = node->children; child != NULL; child = child->next) {
         if (child->type == XML_ELEMENT_NODE) {
@@ -171,12 +71,6 @@ int hasChildElements(xmlNodePtr node) {
     return 0;
 }
 
-/*
- * @brief Exécute un fichier SQL sur une base de données SQLite.
- * @param db_name Nom de la base de données.
- * @param sql_file Fichier SQL à exécuter.
- * @return int Renvoie 0 en cas de succès, sinon 1.
- */
 int executeSqlFile(const char *db_name, const char *sql_file) {
     sqlite3 *db;
     char *err_msg = 0;
@@ -227,12 +121,6 @@ int executeSqlFile(const char *db_name, const char *sql_file) {
     return 0;
 }
 
-/*
- * @brief Ajoute une relation entre deux tables si elle n'existe pas déjà.
- * @param table1 Nom de la première table.
- * @param table2 Nom de la deuxième table.
- * @param relation_node Nœud XML contenant la relation.
- */
 void addRelation(const char *table1, const char *table2, xmlNodePtr relation_node) {
     for (int i = 0; i < relation_count; i++) {
         if ((strcmp(relation_attributes[i].table_1, table1) == 0 &&
@@ -266,13 +154,6 @@ void addRelation(const char *table1, const char *table2, xmlNodePtr relation_nod
     relation_count++;
 }
 
-/*
- * @brief Crée une table SQL à partir d'un nœud XML.
- * @param output_file Fichier de sortie où écrire le SQL.
- * @param node Nœud XML représentant la table.
- * @param tables Liste des tables créées.
- * @param table_count Pointeur sur le nombre de tables créées.
- */
 void createTable(FILE *output_file, xmlNodePtr node, char tables[MAX_TABLES][MAX_TABLE_NAME], int *table_count) {
     if (!hasChildElements(node)) {
         return;
@@ -339,13 +220,6 @@ void createTable(FILE *output_file, xmlNodePtr node, char tables[MAX_TABLES][MAX
     }
 }
 
-/*
- * @brief Insère les données d'un nœud XML dans la table SQL correspondante.
- * @param output_file Fichier de sortie où écrire le SQL.
- * @param node Nœud XML contenant les données.
- * @param parent_id Identifiant du parent (0 si aucun).
- * @param parent_table Nom de la table parente (NULL si aucun).
- */
 void insertData(FILE *output_file, xmlNodePtr node, int parent_id, const char *parent_table) {
     if (node->type != XML_ELEMENT_NODE) {
         return;
@@ -434,10 +308,6 @@ void insertData(FILE *output_file, xmlNodePtr node, int parent_id, const char *p
     }
 }
 
-/*
- * @brief Génère le fichier SQL à partir du document XML.
- * @param root Racine du document XML.
- */
 void generateSql(xmlNodePtr root) {
     if (root == NULL) {
         return;
@@ -486,10 +356,6 @@ void generateSql(xmlNodePtr root) {
     fclose(output_file);
 }
 
-/*
- * @brief Analyse un fichier XML et déclenche la génération du SQL.
- * @param filename Nom du fichier XML.
- */
 void parseXml(const char *filename) {
     xmlDocPtr doc = xmlReadFile(filename, NULL, 0);
     if (doc == NULL) {
@@ -511,23 +377,73 @@ void parseXml(const char *filename) {
     xmlCleanupParser();
 }
 
-/*
- * @brief Fonction principale.
- * @param argc Nombre d'arguments.
- * @param argv Tableau des arguments.
- * @return int Code de retour.
- */
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <file.xml>\n", argv[0]);
-        return 1;
+void xmlbuilder_confirm(GtkButton *button, gpointer user_data) {
+    GtkWidget *entry_file = GTK_WIDGET(user_data);
+
+    char *file_path = gtk_entry_get_text(GTK_ENTRY(entry_file));
+
+    if (strstr(file_path, ".xml") != NULL) {
+        xml_file_path = file_path;
+
+        parseXml(xml_file_path);
+
+        const char *db_name = "my_database.db";
+        const char *sql_file = "output.sql";
+        executeSqlFile(db_name, sql_file);
+    } else {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Le fichier doit être un fichier XML.");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+    }
+}
+
+void xmlbuilder(GtkWidget *widget, gpointer data) {
+    const char *title = gtk_button_get_label(GTK_BUTTON(widget));
+    int button_index = GPOINTER_TO_INT(data);
+
+    if (open_windows[button_index] != NULL) {
+        gtk_window_present(GTK_WINDOW(open_windows[button_index]));
+        return;
     }
 
-    const char *filename = argv[1];
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(window), title);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 200);
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+    open_windows[button_index] = window;
 
-    parseXml(filename);
+    g_signal_connect(window, "destroy", G_CALLBACK(destroyWindow), GINT_TO_POINTER(button_index));
 
-    const char *db_name = "my_database.db";
-    const char *sql_file = "output.sql";
-    return executeSqlFile(db_name, sql_file);
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_container_add(GTK_CONTAINER(window), box);
+
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 10);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 10);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_BOX(box), grid, TRUE, TRUE, 10);
+
+    GtkWidget *space1 = gtk_label_new("");
+    gtk_grid_attach(GTK_GRID(grid), space1, 0, 1, 2, 1);
+
+    GtkWidget *label_file = gtk_label_new("Fichier xml :");
+    gtk_grid_attach(GTK_GRID(grid), label_file, 0, 2, 2, 1);
+
+    GtkWidget *entry_file = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry_file), "Chemin du fichier");
+    gtk_widget_set_size_request(entry_file, 300, 30);
+    gtk_grid_attach(GTK_GRID(grid), entry_file, 0, 3, 2, 1);
+
+    GtkWidget *space2 = gtk_label_new("");
+    gtk_grid_attach(GTK_GRID(grid), space2, 0, 4, 2, 1);
+
+    GtkWidget *xmlbuilder_button = gtk_button_new_with_label("Confirmer");
+    gtk_widget_set_size_request(xmlbuilder_button, 300, 30);
+    gtk_grid_attach(GTK_GRID(grid), xmlbuilder_button, 0, 5, 2, 1);
+
+    g_signal_connect(xmlbuilder_button, "clicked", G_CALLBACK(xmlbuilder_confirm), entry_file);
+
+    gtk_widget_show_all(window);
 }
+
