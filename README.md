@@ -51,7 +51,7 @@ Nous souhaitons créer une interface centralisée simple mais efficace qui perme
     make
 
     #Exécution de l'interface principale
-    ./c-nets-tools
+    sudo ./exe/c-nets-tools
     ```
 
 
